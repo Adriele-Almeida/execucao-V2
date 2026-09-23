@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta property="og:title" content="ORDEM DE EXECUÇÃO">
+
+<meta property="og:description" content="Dashboard Estratégico">
+
+<meta property="og:image" content="miniatura.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>ORDEM DE EXECUÇÃO | Dashboard Estratégico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#080909; --surface:#111313; --surface-2:#171a1b; --surface-3:#202425;
+      --border:#2b3031; --text:#f1f5f5; --muted:#8a9699; --faint:#566064;
+      --cyan:#00d4ff; --green:#00e676; --gold:#f0b429; --red:#ff4d67;
+      --orange:#ff9f43; --purple:#a29bfe; --radius:10px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { color-scheme:dark; }
+    body { min-height:100vh; background:var(--bg); color:var(--text); font-family:'Rajdhani',sans-serif; overflow-x:hidden; }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; }
+    a { color:var(--cyan); text-decoration:none; }
+
+    header {
+      min-height:72px; padding:14px 24px; position:sticky; top:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between; gap:20px;
+      background:rgba(17,19,19,.96); border-bottom:1px solid var(--border); backdrop-filter:blur(12px);
+    }
+    .brand { border:0; padding:0; background:transparent; text-align:left; cursor:pointer; }
+    .brand h1 { color:var(--cyan); font:700 14px 'Exo 2',sans-serif; letter-spacing:2.4px; }
+    .brand p { margin-top:5px; color:var(--muted); font-size:12px; letter-spacing:1.5px; }
+    .header-actions { display:flex; align-items:center; gap:8px; }
+    .icon-btn { width:42px; height:42px; border:1px solid var(--border); border-radius:8px; background:transparent; color:var(--text); position:relative; }
+    .icon-btn:hover { border-color:var(--cyan); color:var(--cyan); }
+    .notification-count { display:none; position:absolute; top:-6px; right:-5px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--red); color:white; font-size:10px; line-height:18px; }
+
+    .app-shell { display:grid; grid-template-columns:230px minmax(0,1fr); min-height:calc(100vh - 72px); }
+    .sidebar { position:sticky; top:72px; height:calc(100vh - 72px); overflow:auto; padding:18px 10px; background:var(--surface); border-right:1px solid var(--border); }
+    .nav-label { padding:4px 12px 10px; color:var(--faint); font:500 9px 'Exo 2',sans-serif; letter-spacing:2px; text-transform:uppercase; }
+    .nav-button { width:100%; border:0; border-left:3px solid transparent; border-radius:5px; padding:11px 12px; margin-bottom:3px; background:transparent; color:var(--muted); text-align:left; font-weight:600; font-size:14px; }
+    .nav-button:hover,.nav-button.active { background:var(--surface-2); border-left-color:var(--cyan); color:var(--cyan); }
+    .nav-separator { height:1px; margin:14px 10px; background:var(--border); }
+
+    main { min-width:0; padding:28px; }
+    .page-header { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:20px; }
+    .page-heading h2 { font:700 18px 'Exo 2',sans-serif; letter-spacing:1.5px; color:var(--text); text-transform:uppercase; }
+    .page-heading p { margin-top:7px; color:var(--muted); font-size:14px; }
+    .btn { min-height:38px; border-radius:6px; padding:8px 15px; border:1px solid transparent; display:inline-flex; align-items:center; justify-content:center; gap:7px; font-weight:700; font-size:12px; letter-spacing:.8px; text-transform:uppercase; }
+    .btn-primary { background:var(--cyan); color:#001115; }
+    .btn-primary:hover { background:#50e2ff; }
+    .btn-ghost { background:transparent; border-color:var(--border); color:var(--muted); }
+    .btn-ghost:hover { border-color:var(--cyan); color:var(--cyan); }
+    .btn-danger { background:transparent; border-color:var(--red); color:var(--red); }
+    .btn-danger:hover { background:var(--red); color:white; }
+    .btn-small { min-height:32px; padding:6px 11px; font-size:11px; }
+
+    .filter-panel { display:grid; grid-template-columns:1.1fr 1.2fr .85fr .85fr 1.5fr auto; gap:10px; align-items:end; margin-bottom:22px; padding:15px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); }
+    .filter-panel.clients-only { grid-template-columns:minmax(0,1fr) auto; }
+    .filter-actions { display:flex; justify-content:flex-end; margin:-5px 0 12px; }
+    .filter-toggle svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+    .field label { display:block; margin-bottom:6px; color:var(--muted); font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; }
+    .control { width:100%; min-height:40px; border:1px solid var(--border); border-radius:6px; padding:8px 10px; background:var(--surface-2); color:var(--text); outline:none; }
+    .control:focus { border-color:var(--cyan); box-shadow:0 0 0 2px rgba(0,212,255,.1); }
+
+    .summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:24px; }
+    .summary-card { min-width:0; min-height:78px; padding:16px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); }
+    .summary-value { font:700 23px 'Exo 2',sans-serif; }
+    .summary-name { margin-top:7px; color:var(--muted); font-size:11px; letter-spacing:1px; text-transform:uppercase; }
+    .summary-action { width:100%; display:flex; align-items:center; color:var(--cyan); text-align:left; }
+    .summary-action .summary-name { margin-top:0; color:inherit; font:700 13px 'Exo 2',sans-serif; letter-spacing:1.2px; }
+    .summary-action:hover,.summary-action:focus-visible { border-color:var(--cyan); background:var(--surface-2); outline:none; }
+
+    .section { margin-bottom:25px; }
+    .section-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid var(--border); }
+    .section-heading h3 { font:600 11px 'Exo 2',sans-serif; color:var(--muted); letter-spacing:1.6px; text-transform:uppercase; }
+    .section-heading span { color:var(--faint); font-size:12px; }
+    .quick-filters { display:flex; flex-wrap:wrap; gap:7px; margin:0 0 13px; }
+    .quick-filter { min-height:31px; padding:6px 14px; border:1px solid var(--border); border-radius:18px; background:transparent; color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; }
+    .quick-filter:hover,.quick-filter.active { border-color:var(--cyan); background:var(--cyan); color:#001115; }
+
+    .clients-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .client-card { padding:17px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); }
+    .client-card-head { display:flex; align-items:center; gap:9px; margin-bottom:12px; }
+    .client-dot { width:10px; height:10px; border-radius:50%; flex:none; }
+    .client-card h4 { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:17px; }
+    .client-meta { min-height:38px; color:var(--muted); font-size:13px; }
+    .client-stats { display:flex; flex-wrap:wrap; gap:6px; margin:13px 0; }
+    .mini-stat { padding:4px 7px; border-radius:5px; background:var(--surface-2); color:var(--muted); font-size:11px; }
+    .client-actions { display:flex; gap:7px; }
+
+    .calendar-box { border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); overflow:hidden; }
+    .calendar-toolbar { display:flex; align-items:center; gap:8px; padding:12px; border-bottom:1px solid var(--border); }
+    .calendar-title { min-width:190px; color:var(--cyan); font:600 12px 'Exo 2',sans-serif; text-align:center; }
+    .calendar-toolbar .view-buttons { display:flex; gap:5px; margin-left:auto; }
+    .calendar-toolbar .btn.active { border-color:var(--cyan); background:var(--cyan); color:#001115; }
+    .calendar-grid.month { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:1px; background:var(--border); }
+    .calendar-weekday { padding:8px 5px; background:var(--surface-2); color:var(--faint); font-size:10px; text-align:center; text-transform:uppercase; }
+    .calendar-day { min-height:88px; padding:7px; background:var(--surface); }
+    .calendar-day.empty { background:#0d0f0f; }
+    .calendar-day.today { box-shadow:inset 0 0 0 1px var(--cyan); }
+    .day-number { color:var(--muted); font-size:11px; }
+    .calendar-event { display:block; width:100%; margin-top:5px; padding:4px 5px; overflow:hidden; border:0; border-left:3px solid var(--cyan); border-radius:3px; background:rgba(0,212,255,.09); color:var(--text); font-size:10px; text-align:left; white-space:nowrap; text-overflow:ellipsis; }
+    .week-grid { display:grid; grid-template-columns:repeat(7,minmax(145px,1fr)); gap:8px; padding:10px; overflow-x:auto; }
+    .week-day { min-height:150px; padding:10px; border:1px solid var(--border); border-radius:8px; background:var(--surface-2); }
+    .week-day.today { border-color:var(--cyan); }
+    .week-day h4 { margin-bottom:9px; color:var(--muted); font-size:12px; }
+    .day-list { padding:12px; }
+    .day-event { display:grid; grid-template-columns:65px 1fr auto; gap:12px; align-items:center; padding:12px; border-bottom:1px solid var(--border); }
+    .day-event:last-child { border-bottom:0; }
+
+    .table-wrap { border:1px solid var(--border); border-radius:var(--radius); overflow:auto; background:var(--surface); }
+    table { width:100%; min-width:820px; border-collapse:collapse; }
+    th { padding:11px 12px; border-bottom:1px solid var(--border); color:var(--faint); font-size:9px; letter-spacing:1.2px; text-align:left; text-transform:uppercase; }
+    td { padding:13px 12px; border-bottom:1px solid var(--border); color:var(--muted); font-size:13px; vertical-align:middle; }
+    tbody tr:last-child td { border-bottom:0; }
+    tbody tr:hover { background:rgba(255,255,255,.015); }
+    .post-title { max-width:250px; color:var(--text); font-weight:700; }
+    .badge { display:inline-flex; padding:4px 8px; border-radius:10px; border:1px solid currentColor; font-size:10px; font-weight:700; white-space:nowrap; }
+    .status-criar { color:var(--red); }
+    .status-conferir { color:var(--purple); }
+    .status-refinar { color:var(--orange); }
+    .status-programado { color:var(--gold); }
+    .status-publicado { color:var(--green); }
+    .empty-state { padding:44px 20px; color:var(--faint); text-align:center; }
+    .empty-state strong { display:block; margin-bottom:6px; color:var(--muted); font-size:15px; }
+
+    .settings-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .settings-card { padding:18px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); }
+    .settings-card h3 { margin-bottom:8px; font:600 12px 'Exo 2',sans-serif; letter-spacing:1px; }
+    .settings-card p { margin-bottom:15px; color:var(--muted); font-size:13px; }
+    .danger-card { border-color:rgba(255,77,103,.4); }
+    .danger-card h3 { color:var(--red); }
+    .settings-actions { display:flex; flex-wrap:wrap; gap:8px; }
+    .danger-form { display:grid; gap:10px; }
+
+    .activity-panel { display:none; margin-bottom:18px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); overflow:hidden; }
+    .activity-panel.open { display:block; }
+    .activity-header { padding:11px 14px; border-bottom:1px solid var(--border); color:var(--cyan); font:600 11px 'Exo 2',sans-serif; letter-spacing:1px; }
+    .activity-item { padding:11px 14px; border-bottom:1px solid var(--border); color:var(--muted); font-size:13px; }
+    .activity-item:last-child { border-bottom:0; }
+    .activity-item time { display:block; margin-top:3px; color:var(--faint); font-size:11px; }
+
+    .modal-overlay { display:none; position:fixed; inset:0; z-index:300; padding:20px; align-items:center; justify-content:center; background:rgba(0,0,0,.78); }
+    .modal-overlay.open { display:flex; }
+    .modal { width:min(720px,100%); max-height:calc(100vh - 40px); overflow:auto; padding:21px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+    .modal-title { margin-bottom:18px; color:var(--cyan); font:700 15px 'Exo 2',sans-serif; letter-spacing:1.2px; text-transform:uppercase; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+    .form-group.full { grid-column:1 / -1; }
+    textarea.control { min-height:92px; resize:vertical; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; padding-top:15px; border-top:1px solid var(--border); }
+    .modal-actions .danger-slot { margin-right:auto; }
+    .color-options { display:flex; flex-wrap:wrap; gap:8px; }
+    .color-option { width:27px; height:27px; border:2px solid transparent; border-radius:50%; }
+    .color-option.selected { border-color:white; transform:scale(1.12); }
+    .toast { position:fixed; right:18px; bottom:18px; z-index:500; max-width:330px; padding:11px 15px; border-radius:7px; background:var(--cyan); color:#001115; font-weight:700; transform:translateY(80px); opacity:0; transition:.2s; }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .auth-screen { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:20px; background:rgba(8,9,9,.97); }
+    .auth-card { width:min(420px,100%); padding:28px; border:1px solid var(--border); border-radius:14px; background:var(--surface); box-shadow:0 24px 80px rgba(0,0,0,.45); }
+    .auth-brand { margin-bottom:24px; color:var(--cyan); font:700 18px 'Exo 2',sans-serif; letter-spacing:1.5px; text-transform:uppercase; }
+    .auth-card p { margin:-14px 0 22px; color:var(--muted); font-size:14px; }
+    .auth-card .field { margin-bottom:14px; }
+    .password-wrap { position:relative; }
+    .password-wrap .control { padding-right:78px; }
+    .password-toggle { position:absolute; right:7px; top:50%; transform:translateY(-50%); border:0; background:transparent; color:var(--cyan); font-size:11px; font-weight:700; }
+    .auth-link { display:block; width:100%; margin-top:12px; border:0; background:transparent; color:var(--cyan); font-size:12px; text-decoration:underline; }
+    .auth-error { min-height:20px; margin-top:12px; color:var(--red); font-size:13px; }
+    .header-user{display:flex;align-items:center;gap:8px;max-width:210px;padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);text-align:left}.header-user .profile-avatar{width:32px;height:32px}.header-user strong{display:block;max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.account-button { width:42px; height:42px; border:1px solid var(--border); border-radius:8px; padding:0; background:transparent; color:var(--text); font-size:22px; line-height:1; }
+    .account-button:hover { border-color:var(--cyan); color:var(--cyan); }
+    .account-menu { display:none; position:fixed; z-index:250; top:65px; right:24px; width:min(310px,calc(100vw - 28px)); padding:9px; border:1px solid var(--border); border-radius:10px; background:var(--surface); box-shadow:0 18px 42px rgba(0,0,0,.42); }
+    .account-menu.open { display:block; }
+    .account-menu-title { padding:8px 9px 5px; color:var(--faint); font:600 10px 'Exo 2',sans-serif; letter-spacing:1.3px; text-transform:uppercase; }
+    .account-menu-item { display:flex; align-items:center; gap:10px; width:100%; padding:10px 9px; border:0; border-radius:6px; background:transparent; color:var(--text); text-align:left; }
+    .account-menu-item:hover { background:var(--surface-2); }
+    .profile-avatar { width:36px; height:36px; flex:none; overflow:hidden; display:grid; place-items:center; border:1px solid var(--border); border-radius:50%; background:var(--surface-2); color:var(--cyan); font-weight:700; }
+    .profile-avatar img { width:100%; height:100%; object-fit:cover; }
+    .profile-photo-editor{display:grid;gap:9px;margin:0 0 16px;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2)}.profile-photo-editor label{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:13px}.profile-photo-editor input{width:150px}.profile-contact-icon{width:42px;height:42px;padding:9px}.profile-contact-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8}.profile-contact-icon.active{border-color:var(--cyan);color:var(--cyan)}
+    .account-menu-item small { display:block; margin-top:2px; color:var(--muted); font-size:12px; }
+    .profile-divider { height:1px; margin:7px 0; background:var(--border); }
+    .profile-header { display:flex; align-items:center; gap:13px; margin-bottom:18px; }
+    .profile-header .profile-avatar { width:62px; height:62px; font-size:20px; }
+    .profile-header h3 { color:var(--text); font-size:18px; }
+    .profile-header p { margin:3px 0 0; color:var(--muted); font-size:13px; }
+    .profile-upload-row { display:flex; align-items:center; gap:10px; margin:0 0 16px; }
+    .profile-upload-row input { display:none; }
+    .profile-contact-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .profile-contact-actions .btn[disabled] { cursor:not-allowed; opacity:.42; }
+    .client-instagram-link{display:inline-flex;align-items:center;gap:6px;margin-top:5px;color:var(--cyan);font-weight:700}.client-instagram-link svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}.client-detail-links{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.client-detail-info{padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);margin:12px 0}.client-detail-info h4{margin-bottom:7px}.custom-field-card .caption-copy{position:static;align-self:flex-end;margin-top:8px}.card-text-wrap{display:flex;flex-direction:column;gap:8px}.card-text-wrap textarea{min-height:120px;scrollbar-width:thin;scrollbar-color:var(--cyan) var(--surface-2)}.card-text-wrap textarea::-webkit-scrollbar{width:8px}.card-text-wrap textarea::-webkit-scrollbar-track{background:var(--surface-2);border-radius:8px}.card-text-wrap textarea::-webkit-scrollbar-thumb{background:var(--cyan);border-radius:8px}.card-assignment-control{font-weight:700;color:var(--muted)}
+    .productivity-client-picker { display:flex; flex-wrap:wrap; gap:7px; margin:-5px 0 14px; padding:12px; border:1px solid var(--border); border-radius:10px; background:var(--surface-2); }
+    .productivity-client-picker[hidden] { display:none !important; }
+    .summary-action.has-new-order { border-color:var(--cyan); box-shadow:0 0 18px rgba(0,212,255,.22), inset 3px 0 0 var(--cyan); }
+    .summary-order-count { display:inline-flex; align-items:center; justify-content:center; min-width:22px; height:22px; margin-left:auto; padding:0 6px; border-radius:11px; background:var(--cyan); color:#071014; font-size:12px; font-weight:800; }
+    .status-concluido { color:var(--green); border-color:var(--green); }
+    .hidden { display:none !important; }
+    .auth-screen.auth-checking { visibility:hidden; pointer-events:none; }
+    body.app-starting > header, body.app-starting > .app-shell, body.app-starting > .auth-screen { visibility:hidden !important; }
+
+    @media (max-width:1050px) {
+      .filter-panel { grid-template-columns:repeat(3,1fr); }
+      .summary-grid { grid-template-columns:repeat(3,1fr); }
+      .clients-grid { grid-template-columns:repeat(2,1fr); }
+    }
+    @media (max-width:760px) {
+      header { min-height:66px; padding:11px 14px; }
+      .brand h1 { font-size:11px; letter-spacing:1.5px; }
+      .brand p { font-size:10px; }
+      .header-actions .btn { min-height:34px; padding:7px 9px; font-size:10px; }.header-user{max-width:108px;padding:3px 5px}.header-user strong{max-width:62px;font-size:11px}
+      .account-button { display:inline-flex; }
+      .app-shell { display:block; min-height:calc(100vh - 66px); }
+      .sidebar { position:sticky; top:66px; z-index:90; width:100%; height:auto; padding:8px; overflow-x:auto; border-right:0; border-bottom:1px solid var(--border); white-space:nowrap; }
+      .nav-label,.nav-separator { display:none; }
+      #mainNav { display:flex; gap:6px; width:max-content; }
+      .nav-button { width:auto; margin:0; padding:9px 12px; border:1px solid var(--border); border-radius:18px; font-size:12px; }
+      .nav-button:hover,.nav-button.active { border-color:var(--cyan); }
+      main { padding:18px 12px 28px; }
+      .page-header { align-items:flex-start; }
+      .page-heading h2 { font-size:15px; }
+      .page-heading p { font-size:12px; }
+      .page-header .btn { flex:none; }
+      .filter-panel { grid-template-columns:1fr 1fr; padding:12px; }
+      .filter-panel .search-field { grid-column:1 / -1; }
+      .summary-grid { grid-template-columns:repeat(2,1fr); }
+      .summary-card { padding:13px; }
+      .summary-value { font-size:19px; }
+      .clients-grid,.settings-grid { grid-template-columns:1fr; }
+      .calendar-toolbar { flex-wrap:wrap; }
+      .calendar-title { order:-1; width:100%; }
+      .calendar-toolbar .view-buttons { margin-left:auto; }
+      .calendar-day { min-height:61px; padding:4px; }
+      .calendar-weekday { padding:6px 2px; font-size:8px; }
+      .calendar-event { padding:3px; font-size:0; min-height:7px; }
+      .table-wrap { border:0; overflow:visible; background:transparent; }
+      table { min-width:0; }
+      thead { display:none; }
+      tbody { display:grid; gap:9px; }
+      tr { display:grid; grid-template-columns:1fr auto; gap:7px 10px; padding:13px; border:1px solid var(--border); border-radius:9px; background:var(--surface); }
+      td { display:block; padding:0; border:0; }
+      td[data-label="Cliente"],td[data-label="Data"] { color:var(--muted); font-size:12px; }
+      td[data-label="Tema"] { grid-column:1 / -1; grid-row:1; }
+      td[data-label="Status"] { grid-column:2; grid-row:2; }
+      td[data-label="Arte"] { grid-column:1; }
+      td[data-label="Ações"] { grid-column:2; justify-self:end; }
+      td[data-label="Tipo"] { display:none; }
+      .post-title { max-width:none; }
+      .form-grid { grid-template-columns:1fr; }
+      .form-group.full { grid-column:auto; }
+      .modal-overlay { padding:9px; align-items:flex-end; }
+      .modal { max-height:94vh; padding:17px; border-radius:12px 12px 0 0; }
+    }
+
+    /* Ajustes de leitura e novos cards */
+    .nav-button { font-size:15px; }
+    .page-heading h2 { font-size:20px; }
+    .page-heading p { font-size:15px; }
+    .btn { font-size:13px; }
+    .field label { font-size:11px; }
+    .settings-card h3 { font-size:14px; }
+    .settings-card p,.activity-item { font-size:15px; }
+    .calendar-title { font-size:18px; }
+    .calendar-weekday { font-size:16px; }
+    .day-number { font-size:17px; }
+    .calendar-event { font-size:18px; }
+    .calendar-toolbar .view-buttons .btn { font-size:25px; }
+    .post-row { cursor:pointer; }
+    .post-row:hover { background:rgba(0,212,255,.06); }
+    .caption-wrap { position:relative; }
+    .caption-wrap textarea { padding-bottom:46px; }
+    .caption-copy { position:absolute; right:8px; bottom:8px; min-height:30px; padding:4px 9px; font-size:12px; }
+    .live-clock { margin:-5px 0 20px; color:var(--cyan); font:600 20px 'Exo 2',sans-serif; letter-spacing:.8px; }
+    .custom-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px; }
+    .custom-card { width:100%; padding:16px; border:1px solid var(--border); border-left:4px solid var(--cyan); border-radius:var(--radius); background:var(--surface); text-align:left; cursor:pointer; }
+    .custom-card:hover { border-color:var(--cyan); background:var(--surface-2); }
+    .custom-card h4 { margin-bottom:5px; color:var(--text); font-size:17px; }
+    .custom-card time { display:block; margin-bottom:8px; color:var(--faint); font-size:13px; }
+    .custom-card p { margin:7px 0; color:var(--muted); font-size:15px; white-space:pre-wrap; }
+    .card-client-name { color:var(--cyan); font-size:14px; font-weight:700; }
+    .card-meta { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+    .card-history { display:grid; gap:8px; margin-top:16px; }
+    .card-history-item { padding:10px; border-left:2px solid var(--border); background:var(--surface-2); color:var(--muted); font-size:14px; }
+    .card-history-item time { margin:3px 0 0; font-size:12px; }
+    .execution-list { display:grid; gap:13px; }
+    .execution-card { padding:16px; border:1px solid var(--border); border-left:4px solid var(--cyan); border-radius:var(--radius); background:var(--surface); }
+    .execution-card h4 { margin-bottom:5px; font-size:18px; }
+    .execution-card p { color:var(--muted); font-size:15px; }
+    .card-detail-section { margin-top:16px; padding-top:16px; border-top:1px solid var(--border); }
+    .card-detail-section h4 { margin-bottom:10px; color:var(--muted); font:600 11px 'Exo 2',sans-serif; letter-spacing:1.2px; text-transform:uppercase; }
+    .custom-field-row { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:start; margin-top:9px; }
+    .custom-field-row .control { min-height:38px; }
+    .auth-brand { font-size:20px; }
+    .auth-card p { font-size:18px; }
+    .auth-card .field label { font-size:18px; }
+    .auth-card .btn,.auth-card .password-toggle { font-size:15px; }
+    .auth-link { font-size:13px; }
+    @media (max-width:760px) {
+      .page-heading h2 { font-size:20px; }
+      .page-heading p { font-size:15px; }
+      .calendar-weekday { font-size:16px; }
+      .calendar-event { min-height:26px; font-size:18px; white-space:normal; }
+      .custom-cards { grid-template-columns:1fr; }
+      .live-clock { font-size:17px; }
+    }
+
+
+    /* Leitura móvel: escala própria, sem ampliar elementos que não cabem na grade */
+    @media (max-width:760px) {
+      .brand h1 { font-size:15px; letter-spacing:1.8px; }
+      .brand p { font-size:12px; letter-spacing:1px; }
+      .header-actions { gap:6px; }
+      .header-actions .btn { min-height:38px; padding:8px 10px; font-size:11px; }
+      .account-button { min-height:38px; padding:8px 10px; font-size:11px; }
+      .nav-button { padding:10px 14px; font-size:16px; }
+      .page-heading h2 { font-size:22px; }
+      .page-heading p { font-size:16px; }
+      .live-clock { margin:0 0 18px; font-size:19px; }
+      .filter-toggle { min-height:44px; padding:9px 14px; font-size:15px; }
+      .filter-panel { gap:12px; }
+      .field label { font-size:13px; }
+      .control { min-height:46px; padding:10px 12px; font-size:16px; }
+      .btn { min-height:42px; font-size:14px; }
+      .summary-value { font-size:28px; }
+      .summary-name { font-size:14px; }
+      .section-heading h3 { font-size:16px; }
+      .section-heading span { font-size:14px; }
+      .calendar-toolbar { padding:14px 12px; gap:10px; }
+      .calendar-title { width:100%; min-width:0; font-size:20px; }
+      .calendar-toolbar > .btn { min-height:40px; padding:7px 13px; font-size:18px; }
+      .calendar-toolbar .view-buttons { width:100%; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:0; }
+      .calendar-toolbar .view-buttons .btn { min-height:46px; padding:8px 4px; font-size:15px; letter-spacing:.3px; }
+      .calendar-weekday { padding:9px 2px; font-size:12px; }
+      .calendar-day { min-height:96px; padding:5px; }
+      .day-number { font-size:15px; }
+      .calendar-event { min-height:25px; margin-top:5px; padding:4px 5px; font-size:13px; line-height:17px; white-space:nowrap; text-overflow:ellipsis; }
+      .quick-filter { min-height:38px; padding:7px 13px; font-size:14px; }
+      td[data-label="Cliente"],td[data-label="Data"],td,.client-meta { font-size:16px; }
+      .badge { font-size:13px; }
+      .post-title { font-size:19px; }
+      .activity-item { font-size:16px; }
+    }
+
+
+    /* Hierarquia final: desktop e celular */
+    .header-clock { position:absolute; top:10px; left:50%; transform:translateX(-50%); color:var(--muted); font:600 13px 'Exo 2',sans-serif; letter-spacing:.45px; white-space:nowrap; pointer-events:none; }
+    @media (max-width:760px) {
+      header { min-height:96px; padding:30px 14px 11px; }
+      .header-clock { top:8px; font-size:12px; letter-spacing:.25px; }
+      .brand h1 { font-size:14px; letter-spacing:1.5px; }
+      .brand p { margin-top:3px; font-size:11px; letter-spacing:.8px; }
+      .header-actions .btn,.account-button { min-height:36px; padding:7px 8px; font-size:10px; }
+      .icon-btn { width:38px; height:38px; }
+      .sidebar { top:96px; }
+      .app-shell { min-height:calc(100vh - 96px); }
+      .nav-button { padding:9px 13px; font-size:15px; }
+      main { padding:16px 12px 28px; }
+      .page-heading h2 { font-size:20px; }
+      .page-heading p { font-size:15px; }
+      .filter-toggle { min-height:40px; padding:8px 12px; font-size:14px; }
+      .field label { font-size:12px; }
+      .control { min-height:42px; padding:8px 10px; font-size:15px; }
+      .btn { min-height:40px; font-size:13px; }
+      .summary-value { font-size:25px; }
+      .summary-name { font-size:13px; }
+      .section-heading h3 { font-size:15px; }
+      .section-heading span { font-size:13px; }
+      .calendar-toolbar { padding:11px 10px; gap:8px; }
+      .calendar-title { font-size:18px; }
+      .calendar-toolbar > .btn { min-height:36px; padding:5px 11px; font-size:16px; }
+      .calendar-toolbar .view-buttons .btn { min-height:40px; padding:6px 4px; font-size:14px; }
+      .calendar-weekday { padding:7px 2px; font-size:11px; }
+      .calendar-day { min-height:76px; padding:4px; }
+      .day-number { font-size:14px; }
+      .calendar-event { min-height:22px; margin-top:4px; padding:3px 4px; font-size:12px; line-height:16px; white-space:nowrap; text-overflow:ellipsis; }
+      .quick-filter { min-height:35px; padding:6px 12px; font-size:13px; }
+      td[data-label="Cliente"],td[data-label="Data"],td,.client-meta { font-size:15px; }
+      .badge { font-size:12px; }
+      .post-title { font-size:18px; }
+      .activity-item { font-size:15px; }
+    }
+
+
+    .history-clear-list { max-height:240px; overflow:auto; border:1px solid var(--border); border-radius:6px; margin:10px 0; }
+    .history-clear-list .activity-item { cursor:pointer; }
+
+  
+    /* Fase 4: identificação dos eventos por cliente, sem perder legibilidade no celular */
+    .calendar-event { border-left-color:var(--client-color,var(--cyan)); font-size:12px; line-height:1.25; }
+    .custom-date-inputs { display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; }
+    @media (max-width:760px) { .calendar-event { margin-top:3px; padding:3px 4px; font-size:10px; min-height:20px; } .custom-date-inputs { grid-template-columns:1fr; } }
+
+    /* Fase 5 e 6: leitura consistente e controles de atualizações */
+    .notification-button svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .notification-button { position:relative; }
+    .notification-count { top:-6px; right:-6px; min-width:17px; height:17px; padding:0 4px; line-height:17px; font-size:10px; }
+    .activity-link { display:block; margin-top:6px; padding:0; border:0; background:none; color:var(--cyan); font:inherit; text-align:left; cursor:pointer; }
+    .demand-item strong { color:var(--text); }
+    .control { font-size:15px; }
+    .field label { font-size:12px; }
+    .btn { font-size:13px; }
+    .calendar-title { font-size:18px; }
+    .calendar-weekday { font-size:13px; }
+    .day-number { font-size:14px; }
+    .calendar-event { font-size:12px; }
+    .calendar-toolbar .view-buttons .btn { font-size:13px; }
+    @media (max-width:760px) {
+      header { flex-wrap:wrap; gap:8px; padding:10px 14px; }
+      .brand { min-width:0; }
+      .header-clock { order:3; flex-basis:100%; margin:0; text-align:center; font-size:12px; letter-spacing:.35px; }
+      .header-actions { margin-left:auto; gap:6px; }
+      .header-actions .btn { min-height:36px; padding:7px 9px; font-size:10px; }
+      .icon-btn,.account-button { width:36px; min-width:36px; height:36px; }
+      .nav-button { font-size:14px; padding:9px 13px; }
+      .page-heading h2 { font-size:19px; }
+      .page-heading p { font-size:14px; }
+      .control { min-height:44px; font-size:16px; }
+      .field label { font-size:13px; }
+      .btn { min-height:42px; font-size:13px; }
+      .summary-name { font-size:12px; }
+      .calendar-title { font-size:18px; }
+      .calendar-weekday { font-size:12px; }
+      .day-number { font-size:14px; }
+      .calendar-event { display:block; min-height:21px; padding:3px 4px; font-size:10px; line-height:1.25; }
+      .calendar-toolbar .view-buttons .btn { min-height:38px; font-size:13px; }
+      .activity-item { font-size:14px; }
+    }
+
+    .optional-card-toggle{width:auto;min-height:32px;display:inline-flex;align-items:center;gap:8px;padding:6px 11px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);font:700 12px 'Exo 2',sans-serif;letter-spacing:.8px;text-align:left;cursor:pointer}.optional-card-toggle span{font-size:14px;line-height:1}.optional-card-toggle:hover,.optional-card-toggle[aria-expanded="true"]{border-color:var(--cyan);color:var(--cyan)}.card-optional{margin-top:8px}.custom-field-card{display:grid;gap:7px;margin:12px 0;padding:12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2)}.custom-field-card label{color:var(--faint);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase}.card-text-wrap{position:relative}.card-text-wrap textarea{padding-bottom:44px}.field-remove-link{justify-self:start;padding:4px 0;border:0;background:transparent;color:var(--red);font:600 11px 'Exo 2',sans-serif;cursor:pointer}.cards-management{grid-column:1/-1}.card-management-list{display:grid;gap:8px;max-height:360px;margin:13px 0;overflow:auto}.managed-card{display:flex;gap:10px;align-items:flex-start;padding:11px;border:1px solid var(--border);border-radius:8px;cursor:pointer}.managed-card small{display:block;margin-top:4px;color:var(--muted)}.nav-button{position:relative}.nav-button.has-new-order{border-color:var(--cyan);color:var(--cyan);box-shadow:inset 3px 0 0 var(--cyan)}.nav-order-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;margin-left:7px;border-radius:9px;background:var(--cyan);color:#071014;font-size:11px;font-weight:800}@media(max-width:760px){.custom-date-inputs{grid-template-columns:1fr 1fr}.custom-field-card{padding:10px}.managed-card small{font-size:12px}}
+</style>
+</head>
+<body class="app-starting">
+  <header>
+    <button class="brand" type="button" onclick="openView('Painel')" aria-label="Ir para o painel inicial">
+      <h1>ORDEM DE EXECUÇÃO</h1>
+      <p>Dashboard Estratégico</p>
+    </button>
+    <div class="header-clock" id="headerClock" aria-label="Data e horário atual"></div>
+    <div class="header-actions">
+      <button class="btn btn-primary" type="button" onclick="openPostModal()">Nova postagem</button>
+      <button class="btn btn-ghost" type="button" onclick="openClientModal()">Novo cliente</button>
+      <button class="icon-btn notification-button" type="button" onclick="toggleActivity()" aria-label="Abrir atualizações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 22h4"></path></svg><span class="notification-count" id="notificationCount">0</span></button>
+      <button class="header-user hidden" id="headerUser" type="button" onclick="openOwnProfile()" aria-label="Abrir meu perfil"></button>
+      <button class="account-button" id="accountButton" type="button" onclick="toggleAccountMenu()" aria-label="Abrir menu do perfil" title="Perfil">⋯</button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="nav-label">Operação</div>
+      <nav id="mainNav"></nav>
+    </aside>
+
+    <main>
+      <section class="activity-panel" id="activityPanel"></section>
+
+      <div class="page-header">
+        <div class="page-heading">
+          <h2 id="pageTitle">Painel</h2>
+          <p id="pageDescription">Visão geral da operação.</p>
+        </div>
+        <button class="btn btn-primary" id="primaryAction" type="button">Nova postagem</button>
+      </div>
+
+      <div class="filter-actions" id="filterActions">
+        <button class="btn btn-ghost filter-toggle" id="filterToggle" type="button" onclick="toggleFilters()"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path></svg><span>Filtrar</span></button>
+      </div>
+
+      <section class="filter-panel" id="filterPanel">
+        <div class="field" id="filterStatusField">
+          <label for="filterStatus">Status</label>
+          <select class="control" id="filterStatus" onchange="applyFilters()">
+            <option value="">Todos os status</option>
+            <option>Criar</option><option>Conferir</option><option>Refinar</option><option>Pronto</option><option>Programar</option><option>Programado</option><option>Publicado</option><option>Concluído</option>
+          </select>
+        </div>
+        <div class="field" id="filterClientField">
+          <label for="filterClient">Cliente</label>
+          <select class="control" id="filterClient" onchange="applyFilters()"></select>
+        </div>
+        <div class="field" id="filterMonthField">
+          <label for="filterMonth">Mês</label>
+          <select class="control" id="filterMonth" onchange="applyFilters()">
+            <option value="">Todos os meses</option>
+            <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option>
+            <option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option>
+            <option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div class="field" id="filterYearField">
+          <label for="filterYear">Ano</label>
+          <select class="control" id="filterYear" onchange="applyFilters()"></select>
+        </div>
+        <div class="field search-field" id="filterSearchField">
+          <label for="filterSearch" id="filterSearchLabel">Pesquisar</label>
+          <input class="control" id="filterSearch" type="search" placeholder="Tema, observação ou cliente" oninput="applyFilters()">
+        </div>
+        <button class="btn btn-ghost" id="clearFiltersButton" type="button" onclick="clearFilters()">Limpar</button>
+      </section>
+
+      <section class="summary-grid" id="summaryGrid"></section>
+
+      <section class="section hidden" id="clientsSection">
+        <div class="section-heading"><h3>Clientes cadastrados</h3><span id="clientsCount"></span></div>
+        <div class="clients-grid" id="clientsGrid"></div>
+      </section>
+
+      <section class="section hidden" id="calendarSection">
+        <div class="section-heading"><h3 id="calendarHeading">Calendário</h3></div>
+        <div class="calendar-box">
+          <div class="calendar-toolbar">
+            <button class="btn btn-ghost btn-small" type="button" onclick="changeCalendar(-1)">‹</button>
+            <div class="calendar-title" id="calendarTitle"></div>
+            <button class="btn btn-ghost btn-small" type="button" onclick="changeCalendar(1)">›</button>
+            <div class="view-buttons">
+              <button class="btn btn-ghost btn-small active" data-calendar-view="month" type="button" onclick="setCalendarView('month')">Mês</button>
+              <button class="btn btn-ghost btn-small" data-calendar-view="week" type="button" onclick="setCalendarView('week')">Semana</button>
+              <button class="btn btn-ghost btn-small" data-calendar-view="day" type="button" onclick="setCalendarView('day')">Dia</button>
+            </div>
+          </div>
+          <div id="calendarGrid"></div>
+        </div>
+      </section>
+
+      <section class="section" id="postsSection">
+        <div class="section-heading"><h3 id="postsHeading">Postagens</h3><span id="postsCount"></span></div>
+        <div class="quick-filters hidden" id="quickFilters"></div>
+        <div class="productivity-client-picker" id="productivityClientPicker" hidden></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Cliente</th><th>Tema</th><th>Tipo</th><th>Status</th><th>Arte</th></tr></thead>
+            <tbody id="postsBody"></tbody>
+          </table>
+          <div class="empty-state hidden" id="postsEmpty"><strong>Nenhum item encontrado</strong><span>Não há registros com estas seleções no período exibido.</span></div>
+        </div>
+      </section>
+
+      <section class="section hidden" id="customCardsSection">
+        <div class="section-heading"><h3 id="customCardsHeading">Cards</h3><button class="btn btn-primary" type="button" onclick="openCustomCardModal(state.clientId)">Novo card</button></div>
+        <div class="custom-cards" id="customCardsGrid"></div>
+      </section>
+
+      <section class="section hidden" id="orderExecutionSection"><div class="section-heading"><h3>Ordem de Execução</h3><span id="orderExecutionCount"></span></div><div class="execution-list" id="orderExecutionList"></div></section>
+
+      <section class="section hidden" id="settingsSection">
+        <div class="settings-grid">
+          <article class="settings-card">
+            <h3>Backup dos dados</h3>
+            <p>Exporte uma cópia completa ou importe registros de um arquivo anterior para a base compartilhada.</p>
+            <div class="settings-actions">
+              <button class="btn btn-primary" type="button" onclick="exportBackup()">Exportar backup</button>
+              <label class="btn btn-ghost" for="backupInput">Importar backup</label>
+              <input class="hidden" id="backupInput" type="file" accept=".json,application/json" onchange="importBackup(event)">
+            </div>
+          </article>
+          <article class="settings-card danger-card">
+            <h3>Excluir cliente</h3>
+            <p>A exclusão fica restrita a esta área e remove também as postagens vinculadas ao cliente.</p>
+            <div class="danger-form">
+              <select class="control" id="deleteClientSelect" onchange="prepareClientDeletion()"></select>
+              <input class="control" id="deleteClientConfirmation" type="text" placeholder="Digite o nome exato do cliente" oninput="prepareClientDeletion()">
+              <button class="btn btn-danger" id="deleteClientButton" type="button" onclick="deleteClientFromSettings()" disabled>Excluir cliente definitivamente</button>
+            </div>
+          </article>
+          <article class="settings-card">
+            <h3>Atualizações</h3>
+            <p>Opções exclusivas da administradora para as notificações e o histórico.</p>
+            <div class="danger-form">
+              <label for="notificationClearScope">Limpar notificações</label>
+              <select class="control" id="notificationClearScope" onchange="renderNotificationClearOptions()">
+                <option value="individual">Notificações selecionadas</option>
+                <option value="day">Por dia</option>
+                <option value="month">Por mês</option>
+                <option value="all">Todas as notificações</option>
+              </select>
+              <div id="notificationClearOptions"></div>
+            </div>
+            <div class="danger-form" style="margin-top:18px">
+              <label for="historyClearScope">Limpar histórico</label>
+              <select class="control" id="historyClearScope" onchange="renderHistoryClearOptions()">
+                <option value="individual">Atualizações selecionadas</option>
+                <option value="day">Por dia</option>
+                <option value="month">Por mês</option>
+                <option value="all">Todo o histórico</option>
+              </select>
+              <div id="historyClearOptions"></div>
+            </div>
+          </article>
+          <article class="settings-card cards-management">
+            <h3>Cards</h3><p>Visualize, filtre e selecione os cards que deseja excluir.</p>
+            <div class="form-grid"><div class="field form-group"><label for="cardManageClient">Cliente</label><select class="control" id="cardManageClient" onchange="renderCardManagement()"></select></div><div class="field form-group"><label for="cardManageStatus">Status</label><select class="control" id="cardManageStatus" onchange="renderCardManagement()"><option value="">Todos os status</option><option value="none">Sem status</option><option value="criar">Criar</option><option value="conferir">Conferir</option><option value="refinar">Refinar</option><option value="pronto">Pronto</option><option value="programar">Programar</option><option value="programado">Programado</option><option value="publicado">Publicado</option><option value="concluido">Concluído</option></select></div></div>
+            <div class="card-management-list" id="cardManagementList"></div><button class="btn btn-danger" id="deleteSelectedCardsButton" type="button" onclick="deleteSelectedCards()" disabled>Excluir cards selecionados</button>
+          </article>
+          <article class="settings-card hidden" id="accessManagementCard">
+            <h3>Usuários</h3>
+            <p>Edite os dados, a foto e o acesso de cada pessoa cadastrada.</p>
+            <div id="accessManagementList"></div>
+          </article>
+        </div>
+      </section>
+      <section class="client-workspace hidden" id="clientWorkspaceSection">
+  <div class="client-workspace-head">
+    <div><button class="btn btn-ghost btn-small" type="button" onclick="closeClientWorkspace()">← Clientes</button><div class="client-workspace-title"><span class="client-dot" id="workspaceClientDot"></span><h2 id="workspaceClientName"></h2></div><p id="workspaceClientNiche"></p></div>
+    <button class="btn btn-ghost" type="button" onclick="openClientModal(state.clientWorkspaceId)">Editar cliente</button>
+  </div>
+  <div class="client-workspace-contact" id="workspaceClientContact"></div>
+  <div class="client-cards-header"><h3>Cards do cliente</h3><button class="btn btn-primary" type="button" onclick="openClientCardModal()">Novo card</button></div>
+  <div class="client-cards-grid" id="clientCardsGrid"></div>
+</section>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="postModal" role="dialog" aria-modal="true" aria-labelledby="postModalTitle">
+    <div class="modal">
+      <div class="modal-title" id="postModalTitle">Nova postagem</div>
+      <div class="form-grid">
+        <div class="field form-group"><label for="pClient">Cliente</label><select class="control" id="pClient"><option value="">Selecione o cliente</option></select></div>
+        <div class="field form-group"><label for="pStatus">Etapa</label><select class="control" id="pStatus" onchange="toggleScheduleFields()"><option value="">Selecione a etapa</option><option>Criar</option><option>Conferir</option><option>Refinar</option><option>Pronto</option><option>Programar</option><option>Programado</option><option>Publicado</option><option>Concluído</option></select></div>
+        <div class="field form-group"><label for="pType">Tipo</label><select class="control" id="pType"><option value="">Selecione o tipo</option><option>Carrossel</option><option>Post</option><option>Story</option><option>Reels</option></select></div>
+        <div class="field form-group"><label for="pDate">Data</label><input class="control" id="pDate" type="date"></div>
+        <div class="field form-group"><label for="pTime">Horário</label><input class="control" id="pTime" type="time"></div>
+        <div class="field form-group full"><label for="pTheme">Tema</label><input class="control" id="pTheme" type="text"></div>
+        <div class="field form-group full"><label for="pCanva">Link da arte</label><input class="control" id="pCanva" type="url" placeholder="https://"></div>
+        <div class="field form-group full"><label for="pCaption">Legenda</label><div class="caption-wrap"><textarea class="control" id="pCaption"></textarea><button class="btn btn-ghost caption-copy" type="button" onclick="copyCaption()">Copiar</button></div></div>
+        <div class="field form-group full"><label for="pNotes">Observações</label><textarea class="control" id="pNotes"></textarea></div>
+      </div>
+      <div class="modal-actions">
+        <div class="danger-slot"><button class="btn btn-danger hidden" id="deletePostButton" type="button" onclick="deleteCurrentPost()">Excluir postagem</button></div>
+        <button class="btn btn-ghost" type="button" onclick="closeModal('postModal')">Cancelar</button>
+        <button class="btn btn-primary" type="button" onclick="savePost()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="clientModal" role="dialog" aria-modal="true" aria-labelledby="clientModalTitle">
+    <div class="modal">
+      <div class="modal-title" id="clientModalTitle">Novo cliente</div>
+      <div class="form-grid">
+        <div class="field form-group full"><label for="cName">Nome</label><input class="control" id="cName" type="text"></div>
+        <div class="field form-group"><label for="cInstagram">Instagram</label><input class="control" id="cInstagram" type="url" placeholder="https://instagram.com/perfil"></div>
+        <div class="field form-group"><label for="cSite">Site</label><input class="control" id="cSite" type="url" placeholder="https://"></div>
+        <div class="field form-group full"><label for="cNiche">Nicho</label><input class="control" id="cNiche" type="text"></div>
+        <div class="field form-group full"><label>Informações personalizadas</label><div id="clientExtraFields"></div><div class="settings-actions card-field-actions"><button class="btn btn-ghost btn-small" type="button" onclick="addClientField('text')">+ Texto</button><button class="btn btn-ghost btn-small" type="button" onclick="addClientField('date')">+ Data</button><button class="btn btn-ghost btn-small" type="button" onclick="addClientField('link')">+ Link</button></div></div>
+        <div class="field form-group full"><label>Cor de identificação</label><div class="color-options" id="colorOptions"></div></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" type="button" onclick="closeModal('clientModal')">Cancelar</button>
+        <button class="btn btn-primary" type="button" onclick="saveClient()">Salvar cliente</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="clientDetailModal" role="dialog" aria-modal="true" aria-labelledby="clientDetailTitle"><div class="modal"><div class="modal-title" id="clientDetailTitle">Cliente</div><div id="clientDetailContent"></div><div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal('clientDetailModal')">Fechar</button><button class="btn btn-primary" type="button" id="clientDetailEdit">Editar cliente</button></div></div></div>
+
+  <div class="modal-overlay" id="customCardModal" role="dialog" aria-modal="true" aria-labelledby="customCardModalTitle">
+    <div class="modal">
+      <div class="modal-title" id="customCardModalTitle">Novo card</div>
+      <div class="form-grid">
+        <div class="field form-group full"><label for="cardTitle">Título</label><input class="control" id="cardTitle" type="text"></div>
+        <div class="field form-group"><select class="control card-assignment-control" id="cardClient" aria-label="Cliente"><option value="">Cliente</option></select></div>
+        <div class="field form-group"><select class="control card-assignment-control" id="cardResponsible" aria-label="Responsável"><option value="">Responsável</option></select></div>
+        <div class="field form-group full"><label for="cardStatus">Status</label><select class="control" id="cardStatus"><option value=""></option><option value="criar">Criar</option><option value="conferir">Conferir</option><option value="refinar">Refinar</option><option value="pronto">Pronto</option><option value="programar">Programar</option><option value="programado">Programado</option><option value="publicado">Publicado</option><option value="concluido">Concluído</option></select></div>
+        <div class="field form-group full"><label for="cardObservations">Observação</label><textarea class="control" id="cardObservations"></textarea></div>
+        <div class="field form-group full"><div id="customCardFields"></div><div class="settings-actions card-field-actions"><button class="btn btn-ghost btn-small" type="button" onclick="addCustomCardField('text')">+ Texto</button><button class="btn btn-ghost btn-small" type="button" onclick="addCustomCardField('date')">+ Data</button><button class="btn btn-ghost btn-small" type="button" onclick="addCustomCardField('link')">+ Link</button></div></div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="cancelCustomCard()">Cancelar</button><button class="btn btn-primary" type="button" onclick="saveCustomCard()">Salvar card</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="cardDetailModal" role="dialog" aria-modal="true" aria-labelledby="cardDetailTitle"><div class="modal"><div class="modal-title" id="cardDetailTitle">Card</div><div id="cardDetailContent"></div></div></div>
+
+  <div class="account-menu" id="accountMenu" aria-label="Menu de perfil"></div>
+
+  <div class="modal-overlay" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <div class="modal">
+      <div class="modal-title" id="profileModalTitle">Meu perfil</div>
+      <div id="profileModalContent"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <section class="auth-screen auth-checking" id="authScreen" aria-label="Acesso ao aplicativo">
+    <form class="auth-card" onsubmit="signIn(event)">
+      <div class="auth-brand">ORDEM DE EXECUÇÃO</div>
+      <p>Faça seu login</p>
+      <div class="field"><label for="authEmail">E-mail</label><input class="control" id="authEmail" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="authPassword">Senha</label><div class="password-wrap"><input class="control" id="authPassword" type="password" autocomplete="current-password" required><button class="password-toggle" type="button" onclick="togglePasswordVisibility('authPassword',this)">Mostrar</button></div></div>
+      <button class="btn btn-primary" id="authSubmit" type="submit" style="width:100%">Entrar</button>
+      <button class="auth-link" id="passwordResetRequest" type="button" onclick="requestPasswordReset()">Esqueci minha senha</button>
+      <div class="auth-error" id="authError"></div>
+    </form>
+    <form class="auth-card hidden" id="passwordRecoveryForm" onsubmit="saveNewPassword(event)">
+      <div class="auth-brand">NOVA SENHA</div>
+      <p>Defina a nova senha para acessar a base operacional.</p>
+      <div class="field"><label for="newPassword">Nova senha</label><div class="password-wrap"><input class="control" id="newPassword" type="password" autocomplete="new-password" minlength="6" required><button class="password-toggle" type="button" onclick="togglePasswordVisibility('newPassword',this)">Mostrar</button></div></div>
+      <button class="btn btn-primary" id="newPasswordSubmit" type="submit" style="width:100%">Salvar nova senha</button>
+      <div class="auth-error" id="passwordRecoveryError"></div>
+    </form>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const STATUSES = ['Criar','Conferir','Refinar','Pronto','Programar','Programado','Publicado','Concluído'];
+    const NAV_ITEMS = ['Painel','Ordem de Execução','Todos','Clientes',...STATUSES,'Configurações'];
+    const COLORS = ['#00d4ff','#f0b429','#00e676','#ff4d67','#a29bfe','#ff9f43','#fd79a8','#55efc4','#74b9ff'];
+    const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const SHORT_DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    const VIEW_TEXT = {
+      'Painel':'Visão geral da operação.',
+      'Ordem de Execução':'Demandas e aprovações relacionadas a você.',
+      'Todos':'Visão completa da operação.',
+      'Clientes':'Consulte, inclua e edite os clientes.',
+      'Criar':'Conteúdos que ainda precisam ser criados.',
+      'Conferir':'Conteúdos prontos que aguardam conferência.',
+      'Refinar':'Conteúdos que precisam de ajustes finos.',
+      'Pronto':'Conteúdos finalizados e prontos para serem programados.',
+      'Programar':'Conteúdos em preparação para agendamento.',
+      'Programado':'Postagens com data e horário definidos.',
+      'Publicado':'Histórico das postagens realizadas.',
+      'Concluído':'Tarefas e conteúdos concluídos.',
+      'Configurações':'Backup e operações protegidas do aplicativo.'
+    };
+
+    let state = { view:'Painel', clientId:'', status:'', month:'', year:'', search:'', filtersOpen:false, quickStatuses:[], quickClients:[], quickClientsOpen:false };
+    let editingPostId = null;
+    let editingClientId = null;
+    let selectedColor = '';
+    let calendarView = 'month';
+    let calendarDate = new Date();
+
+    function readData(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
+    function writeData(key,value) { localStorage.setItem(key,JSON.stringify(value)); }
+    function getClients() { return readData('dsc_clients'); }
+    function getPosts() { return readData('dsc_posts'); }
+    function getActivities() { return readData('dsc_activity'); }
+    function saveClients(value) { writeData('dsc_clients',value); }
+    function savePosts(value) { writeData('dsc_posts',value); }
+    function saveActivities(value) { writeData('dsc_activity',value); }
+    function escapeHtml(value='') { return String(value).replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[char])); }
+    function safeUrl(value='') { try { const url=new URL(value); return ['http:','https:'].includes(url.protocol) ? url.href : ''; } catch { return ''; } }
+    function slugStatus(status) { return 'status-' + status.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-'); }
+    function dateKey(date) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
+    function formatDate(value) { if(!value) return 'Sem data'; const [y,m,d]=value.split('-'); return `${d}/${m}/${y}`; }
+    function toast(message) { const el=document.getElementById('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.classList.remove('show'),2600); }
+
+    function logActivity(text) {
+      const activities=getActivities();
+      activities.unshift({id:String(Date.now()),text,at:new Date().toLocaleString('pt-BR')});
+      saveActivities(activities.slice(0,100));
+      const count=document.getElementById('notificationCount');
+      count.textContent=String(Math.min(activities.length,99)); count.style.display='block';
+    }
+
+    function renderNav() {
+      const items=currentProfile?.role==='admin' ? NAV_ITEMS : NAV_ITEMS.filter(name=>name!=='Configurações');
+      const orderCount=unreadCardNotifications().filter(item=>item.notification_type==='demanda').length;
+      document.getElementById('mainNav').innerHTML=items.map(name=>`<button class="nav-button ${state.view===name?'active':''} ${name==='Ordem de Execução'&&orderCount?'has-new-order':''}" type="button" onclick="openView('${name}')">${name}${name==='Ordem de Execução'&&orderCount?`<span class="nav-order-count">${Math.min(orderCount,99)}</span>`:''}</button>`).join('');
+    }
+
+    function openView(view) {
+      if(view==='Configurações' && currentProfile?.role!=='admin') view='Painel';
+      state.view=view;
+      if (STATUSES.includes(view)) state.status=view;
+      else if (view==='Painel' || view==='Ordem de Execução' || view==='Todos' || view==='Clientes' || view==='Configurações') state.status='';
+      if (view==='Clientes' || view==='Configurações') state.clientId='';
+      state.filtersOpen=view==='Todos';
+      render();
+    }
+
+    function clientDetailFieldsHtml(client) { return (client.details||[]).map(field=>{ if(field.type==='link') { const url=safeUrl(field.value); return url?`<p><a href="${url}" target="_blank" rel="noopener">Abrir link</a></p>`:''; } if(field.type==='date') { const v=splitCardDateValue(field.value); return v.date?`<p>${formatDate(v.date)}${v.time?` · ${escapeHtml(v.time)}`:''}</p>`:''; } return `<div class="client-detail-info">${field.label?`<h4>${escapeHtml(field.label)}</h4>`:''}<p>${escapeHtml(field.value||'')}</p></div>`; }).join(''); }
+    function openClientWorkspace(id) {
+      const client=getClients().find(item=>item.id===id); if(!client) return;
+      const posts=getPosts().filter(post=>post.clientId===id), cards=cloudCards.filter(card=>card.client_id===id);
+      document.getElementById('clientDetailTitle').textContent=client.name;
+      const instagram=safeUrl(client.instagram), site=safeUrl(client.site);
+      document.getElementById('clientDetailContent').innerHTML=`<p style="color:${escapeHtml(client.color||'var(--cyan)')}">${escapeHtml(client.niche||'')}</p><div class="client-detail-links">${instagram?`<a href="${instagram}" target="_blank" rel="noopener">${contactIcon('instagram')} Instagram</a>`:''}${site?`<a href="${site}" target="_blank" rel="noopener">Site</a>`:''}</div>${clientDetailFieldsHtml(client)}<div class="client-detail-info"><p>${posts.length} postagem(ns) e ${cards.length} card(s) vinculados.</p></div>`;
+      document.getElementById('clientDetailEdit').onclick=()=>{closeModal('clientDetailModal');openClientModal(id);};
+      document.getElementById('clientDetailModal').classList.add('open');
+    }
+
+    function populateFilterOptions() {
+      const clients=getClients();
+      const clientSelect=document.getElementById('filterClient');
+      clientSelect.innerHTML='<option value="">Todos os clientes</option>'+clients.map(client=>`<option value="${client.id}">${escapeHtml(client.name)}</option>`).join('');
+      clientSelect.value=state.clientId;
+
+      const currentYear=new Date().getFullYear();
+      const years=new Set([currentYear,...getPosts().filter(post=>post.date).map(post=>Number(post.date.slice(0,4)))]);
+      const yearSelect=document.getElementById('filterYear');
+      yearSelect.innerHTML='<option value="">Todos os anos</option>'+[...years].sort((a,b)=>b-a).map(year=>`<option value="${year}">${year}</option>`).join('');
+      yearSelect.value=state.year;
+      document.getElementById('filterStatus').value=state.status;
+      document.getElementById('filterMonth').value=state.month;
+      document.getElementById('filterSearch').value=state.search;
+    }
+
+    function applyFilters() {
+      if(state.view==='Painel' || state.view==='Todos') state.status=document.getElementById('filterStatus').value;
+      else if(STATUSES.includes(state.view)) state.status=state.view;
+      else state.status='';
+      if(state.view!=='Clientes') {
+        state.clientId=document.getElementById('filterClient').value;
+        state.month=document.getElementById('filterMonth').value;
+        state.year=document.getElementById('filterYear').value;
+      }
+      state.search=document.getElementById('filterSearch').value.trim();
+      renderMainContent();
+    }
+
+    function clearFilters() {
+      state.clientId=''; state.month=''; state.year=''; state.search='';
+      state.status=STATUSES.includes(state.view) ? state.view : '';
+      populateFilterOptions(); renderMainContent();
+    }
+
+    function toggleFilters() {
+      state.filtersOpen=!state.filtersOpen;
+      renderFilterControls();
+    }
+
+    function renderFilterControls() {
+      const isTodos=state.view==='Todos';
+      const isClients=state.view==='Clientes';
+      const supportsFilters=state.view!=='Configurações' && state.view!=='Ordem de Execução';
+      const isStage=STATUSES.includes(state.view);
+      const isOpen=isTodos || state.filtersOpen;
+      const panel=document.getElementById('filterPanel');
+      const actions=document.getElementById('filterActions');
+      const toggle=document.getElementById('filterToggle');
+      actions.classList.toggle('hidden',!supportsFilters || isTodos);
+      panel.classList.toggle('hidden',!supportsFilters || !isOpen);
+      panel.classList.toggle('clients-only',isClients);
+      toggle.setAttribute('aria-expanded',String(isOpen));
+      document.getElementById('filterStatusField').classList.toggle('hidden',isClients || isStage);
+      document.getElementById('filterClientField').classList.toggle('hidden',isClients);
+      document.getElementById('filterMonthField').classList.toggle('hidden',isClients);
+      document.getElementById('filterYearField').classList.toggle('hidden',isClients);
+      document.getElementById('clearFiltersButton').classList.toggle('hidden',false);
+      document.getElementById('filterSearchLabel').textContent=isClients?'Pesquisar cliente':'Pesquisar';
+      document.getElementById('filterSearch').placeholder=isClients?'Nome, nicho ou Instagram':'Tema, observação ou cliente';
+    }
+
+    function filteredPosts() {
+      const clients=getClients();
+      const search=state.search.toLowerCase();
+      let posts=getPosts();
+      if(state.view==='Painel') {
+        if(state.quickStatuses.length) posts=posts.filter(post=>state.quickStatuses.includes(post.status));
+        if(state.quickClients.length) posts=posts.filter(post=>state.quickClients.includes(post.clientId));
+        posts=posts.filter(post=>post.date && isInVisibleCalendarPeriod(post.date));
+      } else {
+        if(state.status) posts=posts.filter(post=>post.status===state.status);
+        if(state.clientId) posts=posts.filter(post=>post.clientId===state.clientId);
+      }
+      if(state.month) posts=posts.filter(post=>post.date && Number(post.date.slice(5,7))===Number(state.month));
+      if(state.year) posts=posts.filter(post=>post.date && Number(post.date.slice(0,4))===Number(state.year));
+      if(search) posts=posts.filter(post=>{
+        const client=clients.find(item=>item.id===post.clientId);
+        return [post.title,post.notes,post.legenda,post.type,client?.name].some(value=>String(value||'').toLowerCase().includes(search));
+      });
+      return posts.sort((a,b)=>{
+        const onlyProgrammed=state.view==='Programado'||(state.view==='Painel'&&state.quickStatuses.length===1&&state.quickStatuses[0]==='Programado');
+        const onlyPublished=state.view==='Publicado'||(state.view==='Painel'&&state.quickStatuses.length===1&&state.quickStatuses[0]==='Publicado');
+        if(onlyProgrammed) return `${a.date||'9999'}${a.hora||'99:99'}`.localeCompare(`${b.date||'9999'}${b.hora||'99:99'}`);
+        if(onlyPublished) return `${b.date||''}${b.hora||''}`.localeCompare(`${a.date||''}${a.hora||''}`);
+        return Number(b.updatedAt||b.id||0)-Number(a.updatedAt||a.id||0);
+      });
+    }
+
+    function renderPageHeader() {
+      const client=state.clientId ? getClients().find(item=>item.id===state.clientId) : null;
+      const title=client ? client.name : state.view;
+      const description=client ? 'Todas as etapas e postagens deste cliente.' : VIEW_TEXT[state.view];
+      const pageHeader=document.querySelector('.page-header');
+      pageHeader.classList.toggle('hidden',state.view==='Painel'&&!client);
+      document.getElementById('pageTitle').textContent=title;
+      document.getElementById('pageDescription').textContent=description;
+      const action=document.getElementById('primaryAction');
+      action.classList.remove('hidden');
+      if(state.view==='Clientes') { action.textContent='Novo cliente'; action.onclick=()=>openClientModal(); }
+      else if(state.view==='Configurações' || state.view==='Ordem de Execução') action.classList.add('hidden');
+      else if(state.view==='Criar') { action.textContent='Novo card'; action.onclick=()=>openCustomCardModal(); }
+      else { action.textContent=state.view==='Programado'?'Nova programação':'Nova postagem'; action.onclick=()=>openPostModal(); }
+    }
+
+    function renderSummary() {
+      const section=document.getElementById('summaryGrid');
+      if(state.view!=='Painel') { section.classList.add('hidden'); return; }
+      const orderCount=unreadCardNotifications().filter(item=>item.notification_type==='demanda').length;
+      section.classList.remove('hidden');
+      section.innerHTML=`<button class="summary-card summary-action ${orderCount?'has-new-order':''}" type="button" onclick="openView('Ordem de Execução')"><span class="summary-name">Ordem de Execução</span>${orderCount?`<span class="summary-order-count">${Math.min(orderCount,99)}</span>`:''}</button>`;
+    }
+
+    function renderClients() {
+      const section=document.getElementById('clientsSection');
+      if(state.view!=='Clientes') { section.classList.add('hidden'); return; }
+      section.classList.remove('hidden');
+      const query=state.search.toLowerCase();
+      const clients=getClients().filter(client=>!query || [client.name,client.niche,client.instagram].some(value=>String(value||'').toLowerCase().includes(query)));
+      const posts=getPosts();
+      document.getElementById('clientsCount').textContent=`${clients.length} cliente${clients.length===1?'':'s'}`;
+      document.getElementById('clientsGrid').innerHTML=clients.length ? clients.map(client=>{
+        const clientPosts=posts.filter(post=>post.clientId===client.id);
+        return `<article class="client-card"><div class="client-card-head"><span class="client-dot" style="background:${client.color||'#00d4ff'}"></span><h4>${escapeHtml(client.name)}</h4></div><div class="client-meta">${escapeHtml(client.niche||'Nicho não informado')}${client.instagram?`<br><a class="client-instagram-link" href="${safeUrl(client.instagram)}" target="_blank" rel="noopener">${contactIcon('instagram')} Instagram</a>`:''}</div><div class="client-stats">${STATUSES.map(status=>`<span class="mini-stat">${status}: ${clientPosts.filter(post=>post.status===status).length}</span>`).join('')}</div><div class="client-actions"><button class="btn btn-primary btn-small" type="button" onclick="openClientWorkspace('${client.id}')">Abrir cliente</button><button class="btn btn-ghost btn-small" type="button" onclick="openClientModal('${client.id}')">Editar</button></div></article>`;
+      }).join('') : '<div class="empty-state"><strong>Nenhum cliente cadastrado</strong><span>Use “Novo cliente” para começar.</span></div>';
+    }
+
+    function renderPosts() {
+      const section=document.getElementById('postsSection');
+      if(state.view==='Clientes'||state.view==='Configurações'||state.view==='Ordem de Execução') { section.classList.add('hidden'); return; }
+      section.classList.remove('hidden');
+      const posts=filteredPosts(), clients=getClients();
+      document.getElementById('postsHeading').textContent=state.view==='Painel'?'Esteira de Produtividade':(state.view==='Todos'?'Postagens':(state.status||'Postagens'));
+      renderQuickFilters();
+      document.getElementById('postsCount').textContent=`${posts.length} registro${posts.length===1?'':'s'}`;
+      const body=document.getElementById('postsBody'), empty=document.getElementById('postsEmpty');
+      if(!posts.length) { body.innerHTML=''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      body.innerHTML=posts.map(post=>{
+        const client=clients.find(item=>item.id===post.clientId);
+        const art=safeUrl(post.canva);
+        const color=client?.color||'var(--cyan)';
+        return `<tr class="post-row" style="box-shadow:inset 4px 0 0 ${escapeHtml(color)}" onclick="openPostModal('${post.id}')"><td data-label="Data">${formatDate(post.date)}${post.hora?` · ${escapeHtml(post.hora)}`:''}</td><td data-label="Cliente" style="color:${escapeHtml(color)}">${escapeHtml(client?.name||'Cliente removido')}</td><td data-label="Tema"><div class="post-title">${escapeHtml(post.title||'')}</div>${post.notes?`<small>${escapeHtml(post.notes)}</small>`:''}</td><td data-label="Tipo">${escapeHtml(post.type||'')}</td><td data-label="Status"><span class="badge ${slugStatus(post.status)}">${escapeHtml(post.status)}</span></td><td data-label="Arte">${art?`<a href="${art}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Abrir arte</a>`:'Sem link'}</td></tr>`;
+      }).join('');
+    }
+
+    function renderQuickFilters() {
+      const container=document.getElementById('quickFilters');
+      const clientPicker=document.getElementById('productivityClientPicker');
+      if(state.view!=='Painel') {
+        container.classList.add('hidden');
+        clientPicker.hidden=true;
+        return;
+      }
+      container.classList.remove('hidden');
+      const statusOptions=['Criar','Conferir','Refinar','Pronto','Programar','Programado','Publicado','Concluído'];
+      const nothingSelected=!state.quickStatuses.length&&!state.quickClients.length;
+      container.innerHTML=[
+        `<button class="quick-filter ${state.quickClients.length||state.quickClientsOpen?'active':''}" type="button" onclick="toggleProductivityClients()">Clientes${state.quickClients.length?` (${state.quickClients.length})`:''}</button>`,
+        ...statusOptions.map(status=>`<button class="quick-filter ${state.quickStatuses.includes(status)?'active':''}" type="button" onclick="toggleProductivityStatus('${status}')">${status}</button>`),
+        `<button class="quick-filter ${nothingSelected?'active':''}" type="button" onclick="resetProductivitySelection()">Todos</button>`
+      ].join('');
+      const clients=getClients();
+      clientPicker.hidden=!state.quickClientsOpen;
+      clientPicker.innerHTML=clients.length
+        ? clients.map(client=>`<button class="quick-filter ${state.quickClients.includes(client.id)?'active':''}" type="button" onclick="toggleProductivityClient('${client.id}')">${escapeHtml(client.name)}</button>`).join('')
+        : '<span class="muted">Nenhum cliente cadastrado.</span>';
+    }
+
+    function toggleProductivityClients() {
+      state.quickClientsOpen=!state.quickClientsOpen;
+      renderQuickFilters();
+    }
+
+    function toggleProductivityStatus(status) {
+      state.quickStatuses=state.quickStatuses.includes(status)
+        ? state.quickStatuses.filter(item=>item!==status)
+        : [...state.quickStatuses,status];
+      renderMainContent();
+    }
+
+    function toggleProductivityClient(clientId) {
+      state.quickClients=state.quickClients.includes(clientId)
+        ? state.quickClients.filter(item=>item!==clientId)
+        : [...state.quickClients,clientId];
+      renderMainContent();
+    }
+
+    function resetProductivitySelection() {
+      state.quickStatuses=[];
+      state.quickClients=[];
+      state.quickClientsOpen=false;
+      renderMainContent();
+    }
+
+    function setQuickStatus(status) {
+      if(!status) resetProductivitySelection();
+      else toggleProductivityStatus(status);
+    }
+
+    let selectedManagedCardIds = new Set();
+    function renderCardManagement() {
+      const clientSelect=document.getElementById('cardManageClient'), statusSelect=document.getElementById('cardManageStatus'), list=document.getElementById('cardManagementList'), button=document.getElementById('deleteSelectedCardsButton');
+      if(!clientSelect||!statusSelect||!list||!button) return;
+      const currentClient=clientSelect.value||'', currentStatus=statusSelect.value||'';
+      clientSelect.innerHTML='<option value="">Todos os clientes</option><option value="none">Sem cliente</option>'+getClients().map(client=>`<option value="${client.id}">${escapeHtml(client.name)}</option>`).join(''); clientSelect.value=currentClient;
+      const cards=cloudCards.filter(card=>(!currentClient||(currentClient==='none'?!card.client_id:card.client_id===currentClient))&&(!currentStatus||(currentStatus==='none'?!card.stage:card.stage===currentStatus)));
+      list.innerHTML=cards.length?cards.map(card=>{const client=getCardClient(card),owner=cardOwner(card),updated=new Date(card.updated_at||card.created_at),created=new Date(card.created_at);return `<label class="managed-card"><input type="checkbox" ${selectedManagedCardIds.has(card.id)?'checked':''} onchange="toggleManagedCard('${card.id}',this.checked)"><span><strong>${escapeHtml(card.title||'Sem título')}</strong><small>Cliente: ${escapeHtml(client?.name||'Sem cliente vinculado')} · Status: ${escapeHtml(stageLabel(card.stage))}</small><small>Atualização: ${updated.toLocaleDateString('pt-BR')} · ${updated.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} · Registro: ${created.toLocaleDateString('pt-BR')} · ${created.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} · Autora: ${escapeHtml(owner?.display_name||owner?.email||'Usuária removida')}</small></span></label>`;}).join(''):'<div class="activity-item">Nenhum card encontrado.</div>'; button.disabled=!selectedManagedCardIds.size;
+    }
+    function toggleManagedCard(id,checked) { if(checked) selectedManagedCardIds.add(id); else selectedManagedCardIds.delete(id); document.getElementById('deleteSelectedCardsButton').disabled=!selectedManagedCardIds.size; }
+    async function deleteSelectedCards() { const ids=[...selectedManagedCardIds]; if(!ids.length) return; if(!confirm(`Excluir ${ids.length} card(s) selecionado(s)? Esta ação não pode ser desfeita.`)) return; const {error}=await supabaseClient.from('custom_cards').delete().in('id',ids); if(error) return toast('Não foi possível excluir os cards selecionados.'); selectedManagedCardIds=new Set(); await loadCloudData(); render(); toast('Cards excluídos.'); }
+    function renderSettings() {
+      const section=document.getElementById('settingsSection');
+      if(state.view!=='Configurações' || currentProfile?.role!=='admin') { section.classList.add('hidden'); return; }
+      section.classList.remove('hidden');
+      const clients=getClients();
+      const select=document.getElementById('deleteClientSelect');
+      select.innerHTML='<option value="">Selecione o cliente</option>'+clients.map(client=>`<option value="${client.id}">${escapeHtml(client.name)}</option>`).join('');
+      document.getElementById('deleteClientConfirmation').value='';
+      document.getElementById('deleteClientButton').disabled=true;
+      renderNotificationClearOptions();
+      renderHistoryClearOptions();
+      renderCardManagement();
+    }
+
+    function renderMainContent() {
+      renderPageHeader(); renderSummary(); renderClients(); renderPosts(); renderCustomCards(); renderOrderExecution(); renderSettings(); renderCalendarSection();
+    }
+
+    function render() {
+      updateAutomaticStatuses(); renderNav(); populateFilterOptions();
+      renderFilterControls();
+      renderMainContent();
+    }
+
+    function setCalendarView(view) {
+      calendarView=view;
+      document.querySelectorAll('[data-calendar-view]').forEach(button=>button.classList.toggle('active',button.dataset.calendarView===view));
+      renderCalendar(); renderPosts(); renderCustomCards();
+    }
+
+    function changeCalendar(direction) {
+      if(calendarView==='month') calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()+direction,1);
+      else if(calendarView==='week') calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth(),calendarDate.getDate()+direction*7);
+      else calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth(),calendarDate.getDate()+direction);
+      state.month=String(calendarDate.getMonth()+1); state.year=String(calendarDate.getFullYear());
+      populateFilterOptions(); renderCalendar(); renderPosts(); renderCustomCards();
+    }
+
+    function renderCalendarSection() {
+      const section=document.getElementById('calendarSection');
+      if(state.view!=='Painel' && state.view!=='Programado') { section.classList.add('hidden'); return; }
+      section.classList.remove('hidden');
+      document.getElementById('calendarHeading').textContent=state.view==='Programado'?'Calendário de postagens programadas':'Calendário';
+      if(state.month && state.year) calendarDate=new Date(Number(state.year),Number(state.month)-1,1);
+      renderCalendar();
+    }
+
+    function isInVisibleCalendarPeriod(value) {
+      if(!value) return false;
+      const date=String(value).includes('T')?new Date(value):new Date(`${value}T00:00:00`);
+      if(Number.isNaN(date.getTime())) return false;
+      if(calendarView==='month') return date.getFullYear()===calendarDate.getFullYear()&&date.getMonth()===calendarDate.getMonth();
+      if(calendarView==='day') return dateKey(date)===dateKey(calendarDate);
+      const start=new Date(calendarDate); start.setHours(0,0,0,0); start.setDate(start.getDate()-start.getDay());
+      const end=new Date(start); end.setDate(end.getDate()+7);
+      return date>=start&&date<end;
+    }
+
+    function calendarPosts() {
+      let posts=getPosts().filter(post=>post.date);
+      if(state.view==='Programado') posts=posts.filter(post=>post.status==='Programado');
+      else if(state.view==='Painel') {
+        if(state.quickStatuses.length) posts=posts.filter(post=>state.quickStatuses.includes(post.status));
+        if(state.quickClients.length) posts=posts.filter(post=>state.quickClients.includes(post.clientId));
+      } else if(state.status) posts=posts.filter(post=>post.status===state.status);
+      if(state.view!=='Painel'&&state.clientId) posts=posts.filter(post=>post.clientId===state.clientId);
+      return posts;
+    }
+
+    function renderCalendar() {
+      if(calendarView==='month') renderMonthCalendar();
+      else if(calendarView==='week') renderWeekCalendar();
+      else renderDayCalendar();
+    }
+
+    function calendarEvent(post,clients) {
+      const client=clients.find(item=>item.id===post.clientId);
+      const label=[client?.name,post.title].filter(Boolean).join(' — ');
+      const color=client?.color||'var(--cyan)';
+      return `<button class="calendar-event" style="--client-color:${escapeHtml(color)}" type="button" onclick="openPostModal('${post.id}')" title="${escapeHtml(label)}">${post.hora?`${escapeHtml(post.hora)} · `:''}${escapeHtml(label||'Postagem')}</button>`;
+    }
+
+    function renderMonthCalendar() {
+      const year=calendarDate.getFullYear(), month=calendarDate.getMonth(), today=new Date();
+      document.getElementById('calendarTitle').textContent=`${MONTHS[month]} ${year}`;
+      const firstDay=new Date(year,month,1).getDay(), daysInMonth=new Date(year,month+1,0).getDate();
+      const posts=calendarPosts(), clients=getClients();
+      let html=SHORT_DAYS.map(day=>`<div class="calendar-weekday">${day}</div>`).join('');
+      html+=Array.from({length:firstDay},()=>'<div class="calendar-day empty"></div>').join('');
+      for(let day=1;day<=daysInMonth;day++) {
+        const key=dateKey(new Date(year,month,day));
+        const events=posts.filter(post=>post.date===key).sort((a,b)=>(a.hora||'').localeCompare(b.hora||''));
+        const isToday=dateKey(today)===key;
+        html+=`<div class="calendar-day ${isToday?'today':''}" ondblclick="openPostModal(null,'','${key}')"><span class="day-number">${day}</span>${events.map(post=>calendarEvent(post,clients)).join('')}</div>`;
+      }
+      const grid=document.getElementById('calendarGrid'); grid.className='calendar-grid month'; grid.innerHTML=html;
+    }
+
+    function startOfWeek(date) { const value=new Date(date); value.setDate(value.getDate()-value.getDay()); value.setHours(0,0,0,0); return value; }
+
+    function renderWeekCalendar() {
+      const start=startOfWeek(calendarDate), posts=calendarPosts(), clients=getClients(), today=dateKey(new Date());
+      const days=Array.from({length:7},(_,index)=>new Date(start.getFullYear(),start.getMonth(),start.getDate()+index));
+      document.getElementById('calendarTitle').textContent=`${days[0].getDate()} ${MONTHS[days[0].getMonth()].slice(0,3)} a ${days[6].getDate()} ${MONTHS[days[6].getMonth()].slice(0,3)} ${days[6].getFullYear()}`;
+      const grid=document.getElementById('calendarGrid'); grid.className='week-grid';
+      grid.innerHTML=days.map(day=>{ const key=dateKey(day), events=posts.filter(post=>post.date===key).sort((a,b)=>(a.hora||'').localeCompare(b.hora||'')); return `<div class="week-day ${key===today?'today':''}" ondblclick="openPostModal(null,'','${key}')"><h4>${SHORT_DAYS[day.getDay()]} · ${day.getDate()}</h4>${events.length?events.map(post=>calendarEvent(post,clients)).join(''):'<span style="color:var(--faint);font-size:11px">Sem programação</span>'}</div>`; }).join('');
+    }
+
+    function renderDayCalendar() {
+      const key=dateKey(calendarDate), posts=calendarPosts().filter(post=>post.date===key).sort((a,b)=>(a.hora||'').localeCompare(b.hora||'')), clients=getClients();
+      document.getElementById('calendarTitle').textContent=`${SHORT_DAYS[calendarDate.getDay()]}, ${calendarDate.getDate()} de ${MONTHS[calendarDate.getMonth()]} de ${calendarDate.getFullYear()}`;
+      const grid=document.getElementById('calendarGrid'); grid.className='day-list';
+      grid.innerHTML=posts.length?posts.map(post=>{ const client=clients.find(item=>item.id===post.clientId), color=client?.color||'var(--cyan)'; return `<button class="day-event" style="width:100%;border:0;border-left:4px solid ${escapeHtml(color)};background:transparent;color:inherit;text-align:left" type="button" onclick="openPostModal('${post.id}')"><strong>${escapeHtml(post.hora||'Sem hora')}</strong><span>${escapeHtml(client?.name||'Cliente removido')}${post.title?` — ${escapeHtml(post.title)}`:''}</span><span class="badge ${slugStatus(post.status)}">${escapeHtml(post.status)}</span></button>`; }).join(''):`<div class="empty-state"><strong>Nenhuma postagem nesta data</strong><button class="btn btn-primary btn-small" type="button" onclick="openPostModal(null,'','${key}')">Criar neste dia</button></div>`;
+    }
+
+    function openPostModal(id=null,defaultStatus='',defaultDate='') {
+      const clients=getClients();
+      if(!clients.length) { toast('Cadastre um cliente antes de criar uma postagem.'); openView('Clientes'); return; }
+      editingPostId=id;
+      document.getElementById('pClient').innerHTML='<option value="">Selecione o cliente</option>'+clients.map(client=>`<option value="${client.id}">${escapeHtml(client.name)}</option>`).join('');
+      const post=id?getPosts().find(item=>item.id===id):null;
+      document.getElementById('postModalTitle').textContent=post?'Editar postagem':'Nova postagem';
+      document.getElementById('pClient').value=post?.clientId||'';
+      document.getElementById('pStatus').value=post?.status||defaultStatus;
+      document.getElementById('pType').value=post?.type||'';
+      document.getElementById('pTheme').value=post?.title||'';
+      document.getElementById('pDate').value=post?.date||defaultDate||'';
+      document.getElementById('pTime').value=post?.hora||'';
+      document.getElementById('pCanva').value=post?.canva||'';
+      document.getElementById('pCaption').value=post?.legenda||'';
+      document.getElementById('pNotes').value=post?.notes||'';
+      document.getElementById('deletePostButton').classList.toggle('hidden',!post);
+      toggleScheduleFields(); document.getElementById('postModal').classList.add('open');
+    }
+
+    function toggleScheduleFields() { document.getElementById('timeField')?.classList.remove('hidden'); }
+    function closeModal(id) { if(id==='customCardModal') return; document.getElementById(id).classList.remove('open'); }
+    async function cancelCustomCard() { if(!confirm('Descartar este preenchimento e o rascunho salvo?')) return; if(editingCardId) await supabaseClient.from('custom_cards').delete().eq('id',editingCardId).eq('is_draft',true); editingCardId=null; draftCardId=null; cardFields=[]; document.getElementById('customCardModal').classList.remove('open'); await loadCloudData(); render(); }
+
+    function savePost() {
+      const title=document.getElementById('pTheme').value.trim()||null, status=document.getElementById('pStatus').value;
+      const clientId=document.getElementById('pClient').value, date=document.getElementById('pDate').value, hora=document.getElementById('pTime').value;
+      if(!clientId) return toast('Selecione um cliente.');
+      if(!status) return toast('Selecione a etapa.');
+      if(status==='Programado' && (!date||!hora)) return toast('Postagem programada precisa de data e horário.');
+      const posts=getPosts();
+      const record={id:editingPostId||String(Date.now()),title,clientId,status,type:document.getElementById('pType').value,date,hora:hora||'',canva:document.getElementById('pCanva').value.trim(),legenda:document.getElementById('pCaption').value.trim(),notes:document.getElementById('pNotes').value.trim(),updatedAt:Date.now()};
+      if(editingPostId) { const index=posts.findIndex(item=>item.id===editingPostId); posts[index]=record; logActivity(`Postagem “${title}” atualizada`); }
+      else { posts.push(record); logActivity(`Postagem “${title}” criada em ${status}`); }
+      savePosts(posts); closeModal('postModal'); editingPostId=null; render(); toast('Postagem salva.');
+    }
+
+    function deleteCurrentPost() {
+      if(!editingPostId || !confirm('Excluir esta postagem definitivamente?')) return;
+      const post=getPosts().find(item=>item.id===editingPostId);
+      savePosts(getPosts().filter(item=>item.id!==editingPostId));
+      logActivity(`Postagem “${post?.title||''}” excluída`); closeModal('postModal'); editingPostId=null; render(); toast('Postagem excluída.');
+    }
+
+    function openClientModal(id=null) {
+      editingClientId=id;
+      const client=id?getClients().find(item=>item.id===id):null;
+      selectedColor=client?.color||'';
+      document.getElementById('clientModalTitle').textContent=client?'Editar cliente':'Novo cliente';
+      document.getElementById('cName').value=client?.name||'';
+      document.getElementById('cInstagram').value=client?.instagram||'';
+      document.getElementById('cSite').value=client?.site||'';
+      document.getElementById('cNiche').value=client?.niche||'';
+      clientFields=(client?.details||[]).map(item=>({id:`${Date.now()}-${Math.random()}`,type:item.type||'text',label:item.label||'',value:item.value||''}));
+      renderClientFields();
+      document.getElementById('colorOptions').innerHTML=COLORS.map(color=>`<button class="color-option ${color===selectedColor?'selected':''}" style="background:${color}" type="button" aria-label="Selecionar cor" onclick="selectColor('${color}',this)"></button>`).join('');
+      document.getElementById('clientModal').classList.add('open');
+    }
+
+    function selectColor(color,button) { selectedColor=color; document.querySelectorAll('.color-option').forEach(item=>item.classList.remove('selected')); button.classList.add('selected'); }
+    function renderClientFields() {
+      const holder=document.getElementById('clientExtraFields'); if(!holder) return;
+      holder.innerHTML=clientFields.map(field=>{
+        if(field.type==='link') return `<div class="custom-field-card"><input class="control" type="url" aria-label="Link" placeholder="https://" value="${escapeHtml(field.value||'')}" oninput="updateClientField('${field.id}','value',this.value)"></div>`;
+        if(field.type==='date') { const value=splitCardDateValue(field.value); return `<div class="custom-field-card"><div class="custom-date-inputs"><input class="control" type="date" value="${escapeHtml(value.date)}" onchange="updateClientDateField('${field.id}','date',this.value)"><input class="control" type="time" value="${escapeHtml(value.time)}" onchange="updateClientDateField('${field.id}','time',this.value)"></div></div>`; }
+        return `<div class="custom-field-card"><label>Título</label><input class="control" type="text" value="${escapeHtml(field.label||'')}" oninput="updateClientField('${field.id}','label',this.value)"><label>Texto</label><textarea class="control" oninput="updateClientField('${field.id}','value',this.value)">${escapeHtml(field.value||'')}</textarea></div>`;
+      }).join('');
+    }
+    function addClientField(type) { clientFields.push({id:`${Date.now()}-${Math.random()}`,type,label:'',value:''}); renderClientFields(); }
+    function updateClientField(id,key,value) { const field=clientFields.find(item=>item.id===id); if(field) field[key]=value; }
+    function updateClientDateField(id,part,value) { const field=clientFields.find(item=>item.id===id); if(!field) return; const parsed=splitCardDateValue(field.value); parsed[part]=value; field.value=parsed.date+(parsed.time?'|'+parsed.time:''); }
+
+    function saveClient() {
+      const name=document.getElementById('cName').value.trim(); if(!name) return toast('Informe o nome do cliente.');
+      const clients=getClients();
+      const record={id:editingClientId||String(Date.now()),name,instagram:document.getElementById('cInstagram').value.trim(),niche:document.getElementById('cNiche').value.trim(),color:selectedColor};
+      if(editingClientId) { const index=clients.findIndex(item=>item.id===editingClientId); clients[index]=record; logActivity(`Cliente “${name}” atualizado`); }
+      else { clients.push(record); logActivity(`Cliente “${name}” cadastrado`); }
+      saveClients(clients); closeModal('clientModal'); editingClientId=null; render(); toast('Cliente salvo.');
+    }
+
+    function prepareClientDeletion() {
+      const id=document.getElementById('deleteClientSelect').value;
+      const client=getClients().find(item=>item.id===id);
+      const typed=document.getElementById('deleteClientConfirmation').value.trim();
+      document.getElementById('deleteClientButton').disabled=!client||typed!==client.name;
+    }
+
+    function deleteClientFromSettings() {
+      const id=document.getElementById('deleteClientSelect').value, client=getClients().find(item=>item.id===id); if(!client) return;
+      const postCount=getPosts().filter(post=>post.clientId===id).length;
+      if(!confirm(`Excluir “${client.name}” e ${postCount} postagem(ns) vinculada(s)? Esta ação não pode ser desfeita.`)) return;
+      saveClients(getClients().filter(item=>item.id!==id)); savePosts(getPosts().filter(post=>post.clientId!==id));
+      logActivity(`Cliente “${client.name}” e seus registros foram excluídos`); render(); toast('Cliente excluído.');
+    }
+
+    function exportBackup() {
+      const data={version:'2.0',exportedAt:new Date().toISOString(),clientes:getClients(),posts:getPosts(),atividades:getActivities()};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}), url=URL.createObjectURL(blob), link=document.createElement('a');
+      link.href=url; link.download=`ordem-de-execucao-backup-${dateKey(new Date())}.json`; link.click(); URL.revokeObjectURL(url); toast('Backup exportado.');
+    }
+
+    function importBackup(event) {
+      const file=event.target.files[0]; if(!file) return;
+      const reader=new FileReader(); reader.onload=()=>{ try { const data=JSON.parse(reader.result); if(!Array.isArray(data.clientes)||!Array.isArray(data.posts)) throw new Error(); if(!confirm('Importar este backup substituirá os dados atuais. Continuar?')) return; saveClients(data.clientes); savePosts(data.posts); if(Array.isArray(data.atividades)) saveActivities(data.atividades); logActivity('Backup importado'); render(); toast('Backup importado.'); } catch { toast('Arquivo de backup inválido.'); } }; reader.readAsText(file); event.target.value='';
+    }
+
+    function toggleActivity() {
+      const panel=document.getElementById('activityPanel'), activities=getActivities(); panel.classList.toggle('open');
+      panel.innerHTML=`<div class="activity-header">ATUALIZAÇÕES</div>${activities.length?activities.map(item=>`<div class="activity-item">${escapeHtml(item.text)}<time>${escapeHtml(item.at)}</time></div>`).join(''):'<div class="activity-item">Nenhuma atualização registrada.</div>'}`;
+      document.getElementById('notificationCount').style.display='none';
+    }
+
+    function updateAutomaticStatuses() {
+      /* Publicações programadas são atualizadas pelo agendador do banco, mesmo com o aplicativo fechado. */
+    }
+
+    /* Fase 2: dados compartilhados, login e atualizações em tempo real */
+    const SUPABASE_URL = 'https://rlrtpastjkltutxbftql.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_2UDTBr-_x-LBhKd9vkfVag_KYeqC_jh';
+    let supabaseClient = null;
+    let cloudClients = [];
+    let cloudPosts = [];
+    let cloudCards = [];
+    let cloudCardUpdates = [];
+    let cloudCardNotifications = [];
+    let editingCardId = null;
+    let cardFields = [];
+    let clientFields = [];
+    let cardDraftTimer = null;
+    let draftCardId = null;
+    let selectedHistoryIds = new Set();
+    let selectedNotificationIds = new Set();
+    let notificationDismissalIds = new Set();
+    let cloudActivities = [];
+    let cloudProfiles = [];
+    let currentProfile = null;
+    let activityReadAt = null;
+    let realtimeChannel = null;
+    let passwordResetCooldown = null;
+
+    function getClients() { return cloudClients; }
+    function getPosts() { return cloudPosts; }
+    function getActivities() { return cloudActivities; }
+    function saveClients() {}
+    function savePosts() {}
+    function saveActivities() {}
+    function logActivity() {}
+
+    function mapClient(row) { return {id:row.id,name:row.name,instagram:row.instagram||'',site:row.site||'',niche:row.niche||'',details:Array.isArray(row.details)?row.details:[],color:row.color||COLORS[0]}; }
+    function mapPost(row) { return {id:row.id,title:row.title,clientId:row.client_id,status:row.status,type:row.type||'',date:row.post_date||'',hora:(row.post_time||'').slice(0,5),canva:row.canva||'',legenda:row.legenda||'',notes:row.notes||'',updatedAt:Date.parse(row.updated_at||row.created_at||0)}; }
+
+    function cloudReady() { return Boolean(supabaseClient && currentProfile); }
+
+    function showPasswordRecovery() {
+      document.querySelector('#authScreen form:first-child').classList.add('hidden');
+      document.getElementById('passwordRecoveryForm').classList.remove('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+    }
+
+    function authErrorMessage(error, context='login') {
+      const message=String(error?.message||'').toLowerCase(), status=Number(error?.status||0);
+      if(context==='login' && (status===400 || message.includes('invalid login credentials'))) return 'E-mail ou senha inválidos.';
+      if(context==='recovery' && (status===429 || message.includes('security purposes') || message.includes('rate limit'))) return 'Aguarde 60 segundos antes de solicitar outro link.';
+      if(context==='recovery') return 'Não foi possível enviar o link de redefinição. Tente novamente em alguns minutos.';
+      if(context==='new-password' && (status===403 || message.includes('token') || message.includes('session'))) return 'Este link de redefinição não é mais válido. Solicite outro link.';
+      if(context==='new-password') return 'Não foi possível atualizar a senha. Solicite um novo link.';
+      return 'Não foi possível concluir esta ação. Tente novamente.';
+    }
+
+    function setPasswordResetCooldown(seconds=60) {
+      const button=document.getElementById('passwordResetRequest');
+      if(!button) return;
+      clearInterval(passwordResetCooldown);
+      let remaining=seconds;
+      button.disabled=true;
+      button.textContent=`Aguarde ${remaining}s para solicitar novamente`;
+      passwordResetCooldown=setInterval(()=>{
+        remaining-=1;
+        if(remaining<=0) {
+          clearInterval(passwordResetCooldown);
+          button.disabled=false;
+          button.textContent='Esqueci minha senha';
+          return;
+        }
+        button.textContent=`Aguarde ${remaining}s para solicitar novamente`;
+      },1000);
+    }
+
+    async function requestPasswordReset() {
+      const email=document.getElementById('authEmail').value.trim(), error=document.getElementById('authError');
+      if(!email) { error.style.color='var(--red)'; error.textContent='Informe seu e-mail para receber o link de redefinição.'; return; }
+      const button=document.getElementById('passwordResetRequest');
+      if(button?.disabled) return;
+      button.disabled=true;
+      const {error:resetError}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:`${location.origin}${location.pathname}`});
+      if(resetError) { button.disabled=false; error.style.color='var(--red)'; error.textContent=authErrorMessage(resetError,'recovery'); return; }
+      error.style.color='var(--green)'; error.textContent='Link de redefinição enviado. Use somente o link mais recente recebido.';
+      setPasswordResetCooldown();
+    }
+
+    async function saveNewPassword(event) {
+      event.preventDefault();
+      const error=document.getElementById('passwordRecoveryError'), submit=document.getElementById('newPasswordSubmit');
+      error.textContent=''; submit.disabled=true; submit.textContent='Salvando...';
+      const {error:updateError}=await supabaseClient.auth.updateUser({password:document.getElementById('newPassword').value});
+      submit.disabled=false; submit.textContent='Salvar nova senha';
+      if(updateError) { error.textContent=authErrorMessage(updateError,'new-password'); return; }
+      history.replaceState({},document.title,location.pathname);
+      document.getElementById('passwordRecoveryForm').classList.add('hidden');
+      document.querySelector('#authScreen form:first-child').classList.remove('hidden');
+      document.getElementById('authPassword').value='';
+      document.getElementById('authError').style.color='var(--green)';
+      document.getElementById('authError').textContent='Senha atualizada. Entre com a nova senha.';
+    }
+
+    function togglePasswordVisibility(inputId,button) {
+      const input=document.getElementById(inputId);
+      const showing=input.type==='text';
+      input.type=showing?'password':'text';
+      button.textContent=showing?'Mostrar':'Ocultar';
+    }
+
+    async function signIn(event) {
+      event.preventDefault();
+      const error=document.getElementById('authError');
+      const submit=document.getElementById('authSubmit');
+      if(submit.disabled) return;
+      error.textContent=''; submit.disabled=true; submit.textContent='Entrando...';
+      const {error:signInError}=await supabaseClient.auth.signInWithPassword({email:document.getElementById('authEmail').value.trim(),password:document.getElementById('authPassword').value});
+      submit.disabled=false; submit.textContent='Entrar';
+      if(signInError) { error.textContent=authErrorMessage(signInError,'login'); return; }
+      error.style.color='var(--green)';
+      error.textContent='Acesso confirmado. Abrindo o painel...';
+      await startApp();
+    }
+
+    function initials(person) {
+      return String(person?.display_name || person?.email || '?').trim().split(/\s+/).map(part=>part[0]).join('').slice(0,2).toUpperCase() || '?';
+    }
+    function avatarStyle(person) { const x=Number(person?.avatar_x??50),y=Number(person?.avatar_y??50),zoom=Number(person?.avatar_zoom??1); return `object-position:${x}% ${y}%;transform:scale(${zoom});`; }
+    function profileAvatar(person) {
+      return person?.avatar_url ? `<img src="${escapeHtml(person.avatar_url)}" alt="" style="${avatarStyle(person)}">` : escapeHtml(initials(person));
+    }
+    function renderHeaderUser() { const header=document.getElementById('headerUser'); if(!header||!currentProfile) return; header.innerHTML=`<span class="profile-avatar">${profileAvatar(currentProfile)}</span><strong>${escapeHtml(currentProfile.display_name||currentProfile.email)}</strong>`; header.classList.remove('hidden'); }
+    function contactIcon(type) { const paths={email:'<path d="M3 5h18v14H3z"/><path d="m3 7 9 6 9-6"/>',whatsapp:'<path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.6-4.1A8 8 0 1 1 20 11.5Z"/><path d="M9 8.5c.5 3 2.4 4.9 5.4 5.4l1.2-1.2-1.6-1.2-.9.4c-1.1-.5-1.8-1.2-2.3-2.3l.4-.9-1.2-1.6Z"/>',instagram:'<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>'}; return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[type]}</svg>`; }
+    function toggleAccountMenu() {
+      const menu=document.getElementById('accountMenu');
+      menu.classList.toggle('open');
+      if(menu.classList.contains('open')) renderAccountMenu();
+    }
+    function renderAccountMenu() {
+      const menu=document.getElementById('accountMenu');
+      const me=currentProfile;
+      const others=cloudProfiles.filter(person=>person.id!==me?.id && person.active);
+      menu.innerHTML=`
+        <div class="account-menu-title">Meu perfil</div>
+        <button class="account-menu-item" type="button" onclick="openOwnProfile()"><span class="profile-avatar">${profileAvatar(me)}</span><span><strong>${escapeHtml(me?.display_name||me?.email||'Meu perfil')}</strong><small>Configurar meu perfil</small></span></button>
+        ${others.length?`<div class="profile-divider"></div><div class="account-menu-title">Pessoas</div>${others.map(person=>`<button class="account-menu-item" type="button" onclick="openProfile('${person.id}')"><span class="profile-avatar">${profileAvatar(person)}</span><span><strong>${escapeHtml(person.display_name||person.email)}</strong><small>${escapeHtml(person.email)}</small></span></button>`).join('')}`:''}
+        <div class="profile-divider"></div>
+        <button class="account-menu-item" type="button" onclick="signOut()">Sair</button>`;
+    }
+    function closeAccountMenu() { document.getElementById('accountMenu').classList.remove('open'); }
+    function isValidPhone(value='') { return value.replace(/\D/g,'').length===11; }
+    function formatPhone(value='') {
+      const digits=value.replace(/\D/g,'').slice(0,11);
+      if(!digits) return '';
+      if(digits.length<=2) return `(${digits}`;
+      if(digits.length<=7) return `(${digits.slice(0,2)}) ${digits.slice(2)}`;
+      return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
+    }
+    function maskProfilePhone(input) { input.value=formatPhone(input.value); refreshProfileContactButtons(); }
+    function refreshProfileContactButtons() {
+      const phone=document.getElementById('profilePhone')?.value || '';
+      const whats=document.getElementById('profileWhatsAppButton');
+      if(whats) whats.disabled=!isValidPhone(phone);
+    }
+    let profileEditingId=null,pendingProfilePhoto=null,profilePhotoDraftUrl='';
+    function profileForm(person,{admin=false}={}) {
+      const title=admin?'Editar usuário':'Meu perfil', canEditPhoto=admin||person.id===currentProfile.id;
+      return `
+        <div class="profile-header"><span class="profile-avatar" id="profileAvatarPreview">${profileAvatar(person)}</span><div><h3>${escapeHtml(person.display_name||person.email)}</h3><p>${escapeHtml(person.email)}</p></div></div>
+        ${canEditPhoto?`<div class="profile-upload-row"><label class="btn btn-ghost btn-small" for="profilePhotoInput">${person.avatar_url?'Alterar foto':'Adicionar foto'}</label><input id="profilePhotoInput" type="file" accept="image/*" onchange="selectProfilePhoto(this.files[0])"></div>
+        <div class="profile-photo-editor hidden" id="profilePhotoEditor"><div class="profile-cropper" onpointerdown="beginProfilePhotoDrag(event)"><img id="profileCropImage" alt=""></div><label>Zoom <input id="avatarZoom" type="range" min="1" max="2" step="0.05" value="1" oninput="setProfileCropZoom(this.value)"></label></div>`:''} 
+        <div class="form-grid">
+          <div class="field form-group full"><label for="profileDisplayName">Nome de usuário</label><input class="control" id="profileDisplayName" type="text" value="${escapeHtml(person.display_name||'')}"></div>
+          <div class="field form-group full"><label for="profilePhone">WhatsApp</label><input class="control" id="profilePhone" type="tel" inputmode="numeric" maxlength="16" placeholder="(31) 00000-0000" value="${escapeHtml(formatPhone(person.phone||''))}" oninput="maskProfilePhone(this)"></div>
+          <div class="field form-group full"><label for="profileInstagram">Instagram</label><input class="control" id="profileInstagram" type="text" placeholder="@usuario" value="${escapeHtml(person.instagram||'')}"></div>
+        </div>
+        ${admin?'':`<div class="settings-actions" style="margin-top:14px"><button class="btn btn-ghost" type="button" onclick="togglePasswordReset()">Redefinir senha</button></div><div class="form-grid hidden" id="passwordResetFields" style="margin-top:14px"><div class="field form-group full"><label for="profileCurrentPassword">Senha atual</label><div class="password-wrap"><input class="control" id="profileCurrentPassword" type="password" autocomplete="current-password"><button class="password-toggle" type="button" onclick="togglePasswordVisibility('profileCurrentPassword',this)">Mostrar</button></div></div><div class="field form-group"><label for="profilePassword">Nova senha</label><div class="password-wrap"><input class="control" id="profilePassword" type="password" autocomplete="new-password"><button class="password-toggle" type="button" onclick="togglePasswordVisibility('profilePassword',this)">Mostrar</button></div></div><div class="field form-group"><label for="profilePasswordConfirm">Confirmar nova senha</label><div class="password-wrap"><input class="control" id="profilePasswordConfirm" type="password" autocomplete="new-password"><button class="password-toggle" type="button" onclick="togglePasswordVisibility('profilePasswordConfirm',this)">Mostrar</button></div></div></div>`}
+        <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal('profileModal')">Cancelar</button><button class="btn btn-primary" type="button" onclick="${admin?'saveAdminUserProfile()':'saveOwnProfile()'}">Salvar</button></div>`;
+    }
+    function openOwnProfile() { closeAccountMenu(); profileEditingId=currentProfile.id; pendingProfilePhoto=null; profilePhotoDraftUrl=''; document.getElementById('profileModalTitle').textContent='Meu perfil'; document.getElementById('profileModalContent').innerHTML=profileForm(currentProfile); document.getElementById('profileModal').classList.add('open'); }
+    function openAdminUserProfile(id) { if(currentProfile?.role!=='admin') return; const person=cloudProfiles.find(item=>item.id===id); if(!person) return; closeAccountMenu(); profileEditingId=id; pendingProfilePhoto=null; profilePhotoDraftUrl=''; document.getElementById('profileModalTitle').textContent='Usuário'; document.getElementById('profileModalContent').innerHTML=profileForm(person,{admin:true}); document.getElementById('profileModal').classList.add('open'); }
+    function openProfile(id) {
+      closeAccountMenu(); const person=cloudProfiles.find(item=>item.id===id); if(!person) return;
+      const phone=String(person.phone||'').replace(/\D/g,''), instagram=String(person.instagram||'').replace(/^@/,'');
+      document.getElementById('profileModalTitle').textContent=person.display_name||person.email;
+      document.getElementById('profileModalContent').innerHTML=`<div class="profile-header"><span class="profile-avatar">${profileAvatar(person)}</span><div><h3>${escapeHtml(person.display_name||person.email)}</h3><p>${escapeHtml(person.email)}</p></div></div><div class="profile-contact-actions"><button class="btn btn-ghost profile-contact-icon active" type="button" title="Copiar e-mail" aria-label="Copiar e-mail" onclick="copyProfileEmail('${escapeHtml(person.email)}')">${contactIcon('email')}</button><button class="btn btn-ghost profile-contact-icon ${isValidPhone(phone)?'active':''}" type="button" title="Abrir WhatsApp" aria-label="Abrir WhatsApp" ${isValidPhone(phone)?`onclick="window.open('https://wa.me/55${phone}','_blank','noopener')"`:'disabled'}>${contactIcon('whatsapp')}</button><button class="btn btn-ghost profile-contact-icon ${instagram?'active':''}" type="button" title="Abrir Instagram" aria-label="Abrir Instagram" ${instagram?`onclick="window.open('https://instagram.com/${encodeURIComponent(instagram)}','_blank','noopener')"`:'disabled'}>${contactIcon('instagram')}</button></div><div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal('profileModal')">Fechar</button></div>`;
+      document.getElementById('profileModal').classList.add('open');
+    }
+    function copyProfileEmail(email) { navigator.clipboard?.writeText(email).then(()=>toast('E-mail copiado.')).catch(()=>toast('Não foi possível copiar o e-mail.')); }
+    function togglePasswordReset(){document.getElementById('passwordResetFields')?.classList.toggle('hidden');}
+    function selectProfilePhoto(file) { if(!file) return; if(!file.type.startsWith('image/')) return toast('Escolha uma imagem.'); if(file.size>5*1024*1024) return toast('A foto deve ter até 5 MB.'); pendingProfilePhoto=file; profilePhotoDraftUrl=URL.createObjectURL(file); document.getElementById('profilePhotoEditor')?.classList.remove('hidden'); previewProfilePhoto(); }
+    function previewProfilePhoto() { const preview=document.getElementById('profileAvatarPreview'), zoom=document.getElementById('avatarZoom')?.value||1,x=document.getElementById('avatarX')?.value||50,y=document.getElementById('avatarY')?.value||50; if(!preview) return; const source=profilePhotoDraftUrl||(cloudProfiles.find(item=>item.id===profileEditingId)?.avatar_url)||currentProfile?.avatar_url; if(source) preview.innerHTML=`<img src="${escapeHtml(source)}" alt="" style="object-position:${x}% ${y}%;transform:scale(${zoom})">`; }
+    async function uploadProfilePhoto(file,userId) { if(!file) return null; const extension=(file.name.split('.').pop()||'jpg').toLowerCase(),path=`${userId}/avatar.${extension}`; const {error}=await supabaseClient.storage.from('profile-avatars').upload(path,file,{upsert:true,contentType:file.type}); if(error) throw error; return supabaseClient.storage.from('profile-avatars').getPublicUrl(path).data.publicUrl; }
+    function profileValues(){return {display_name:document.getElementById('profileDisplayName').value.trim()||null,phone:(document.getElementById('profilePhone').value||'').replace(/\D/g,'')||null,instagram:(document.getElementById('profileInstagram').value||'').trim().replace(/^@/,'')||null,avatar_x:Number(document.getElementById('avatarX')?.value||50),avatar_y:Number(document.getElementById('avatarY')?.value||50),avatar_zoom:Number(document.getElementById('avatarZoom')?.value||1)};}
+    async function saveOwnProfile() { const values=profileValues(); if(values.phone&&!isValidPhone(values.phone)) return toast('Informe o WhatsApp com DDD.'); const password=document.getElementById('profilePassword')?.value||'',confirmation=document.getElementById('profilePasswordConfirm')?.value||'',currentPassword=document.getElementById('profileCurrentPassword')?.value||''; if(password){if(!currentPassword)return toast('Informe a senha atual.');if(password.length<6)return toast('A senha precisa ter ao menos 6 caracteres.');if(password!==confirmation)return toast('As senhas não conferem.');const check=await supabaseClient.auth.signInWithPassword({email:currentProfile.email,password:currentPassword});if(check.error)return toast('Senha atual incorreta.');}
+      try { const url=await uploadProfilePhoto(pendingProfilePhoto,currentProfile.id); if(url)values.avatar_url=url; const {error}=await supabaseClient.from('profiles').update(values).eq('id',currentProfile.id);if(error)throw error;if(password){const {error}=await supabaseClient.auth.updateUser({password});if(error)throw error;}currentProfile={...currentProfile,...values};closeModal('profileModal');await loadCloudData();render();toast('Perfil atualizado.');}catch(error){toast('Não foi possível salvar o perfil.');}}
+    async function saveAdminUserProfile() { if(currentProfile?.role!=='admin'||!profileEditingId)return; const values=profileValues();if(values.phone&&!isValidPhone(values.phone))return toast('Informe o WhatsApp com DDD.');try{const url=await uploadProfilePhoto(pendingProfilePhoto,profileEditingId);if(url)values.avatar_url=url;const {error}=await supabaseClient.from('profiles').update(values).eq('id',profileEditingId);if(error)throw error;closeModal('profileModal');await loadCloudData();render();toast('Usuário atualizado.');}catch(error){toast('Não foi possível salvar o usuário.');}}
+    async function signOut() {
+      if(!supabaseClient) return;
+      await supabaseClient.auth.signOut();
+      currentProfile=null; cloudClients=[]; cloudPosts=[]; cloudActivities=[];
+      document.getElementById('authPassword').value='';
+      const auth=document.getElementById('authScreen'); auth.classList.remove('hidden','auth-checking');
+    }
+
+    function cloudLoadError(target,error) {
+      const detail=String(error?.message||error?.code||'Erro sem detalhe do servidor.');
+      const failure=new Error(`${target}: ${detail}`);
+      failure.target=target;
+      failure.cause=error;
+      return failure;
+    }
+
+    function firstCloudFailure(results) {
+      const entries=[['Clientes',results[0]],['Postagens',results[1]],['Cards',results[2]],['Atualizações dos cards',results[3]],['Notificações dos cards',results[4]],['Histórico de atividades',results[5]],['Perfis',results[6]],['Leituras de atividades',results[7]],['Notificações ocultadas',results[8]]];
+      const failed=entries.find(([,result])=>result.error);
+      return failed?cloudLoadError(failed[0],failed[1].error):null;
+    }
+
+    async function loadCloudData() {
+      const [clientsResult,postsResult,cardsResult,cardUpdatesResult,cardNotificationsResult,activitiesResult,profilesResult,readsResult,dismissalsResult]=await Promise.all([
+        supabaseClient.from('clients').select('*').order('name'),
+        supabaseClient.from('posts').select('*').order('updated_at',{ascending:false}),
+        supabaseClient.from('custom_cards').select('*').order('created_at',{ascending:true}),
+        supabaseClient.from('card_updates').select('*').order('created_at',{ascending:true}),
+        supabaseClient.from('card_notifications').select('*').order('created_at',{ascending:false}),
+        supabaseClient.from('activity_log').select('*').order('created_at',{ascending:false}).limit(100),
+        supabaseClient.from('profiles').select('id,display_name,email,phone,instagram,avatar_url,avatar_x,avatar_y,avatar_zoom,role,active'),
+        supabaseClient.from('activity_reads').select('last_read_at').eq('user_id',currentProfile.id).maybeSingle(),
+        supabaseClient.from('notification_dismissals').select('activity_id').eq('user_id',currentProfile.id)
+      ]);
+      const failure=firstCloudFailure([clientsResult,postsResult,cardsResult,cardUpdatesResult,cardNotificationsResult,activitiesResult,profilesResult,readsResult,dismissalsResult]);
+      if(failure) throw failure;
+      const people=new Map((profilesResult.data||[]).map(person=>[person.id,person]));
+      cloudProfiles=profilesResult.data||[];
+      cloudClients=(clientsResult.data||[]).map(mapClient);
+      cloudPosts=(postsResult.data||[]).map(mapPost);
+      cloudCards=(cardsResult.data||[]).filter(card=>!card.is_draft || card.created_by===currentProfile.id);
+      cloudCardUpdates=(cardUpdatesResult.data||[]).map(item=>({...item,author:people.get(item.author_id)||null}));
+      cloudCardNotifications=cardNotificationsResult.data||[];
+      cloudActivities=uniqueActivities((activitiesResult.data||[]).map(item=>({...item,actor:people.get(item.actor_id)})));
+      notificationDismissalIds=new Set((dismissalsResult.data||[]).map(item=>item.activity_id));
+      activityReadAt=readsResult.data?.last_read_at||null;
+    }
+
+    async function migrateLocalData() {
+      const localClients=readData('dsc_clients'), localPosts=readData('dsc_posts');
+      if(cloudClients.length || (!localClients.length && !localPosts.length)) return;
+      const clientMap=new Map();
+      for(const client of localClients) {
+        const {data,error}=await supabaseClient.from('clients').insert({name:client.name,instagram:client.instagram||null,niche:client.niche||null,color:client.color||COLORS[0],created_by:currentProfile.id,updated_by:currentProfile.id}).select().single();
+        if(error) throw error;
+        clientMap.set(client.id,data.id);
+      }
+      const importedPosts=localPosts.filter(post=>clientMap.has(post.clientId)).map(post=>({title:post.title,client_id:clientMap.get(post.clientId),status:post.status,type:post.type||null,post_date:post.date||null,post_time:post.hora||null,canva:post.canva||null,legenda:post.legenda||null,notes:post.notes||null,created_by:currentProfile.id,updated_by:currentProfile.id}));
+      if(importedPosts.length) { const {error}=await supabaseClient.from('posts').insert(importedPosts); if(error) throw error; }
+    }
+
+    function hasRecoveryLink() {
+      const query=new URLSearchParams(location.search);
+      return location.hash.includes('type=recovery') || query.has('code');
+    }
+
+    let appInitializationPromise=null;
+
+    function finishAppStartup() {
+      document.body.classList.remove('app-starting');
+    }
+
+    async function loadActiveProfileWithRetry(userId) {
+      let lastError=null;
+      for(let attempt=0;attempt<3;attempt++) {
+        const {data,error}=await supabaseClient.from('profiles').select('*').eq('id',userId).maybeSingle();
+        if(!error) return {profile:data,error:null};
+        lastError=error;
+        if(attempt<2) await new Promise(resolve=>setTimeout(resolve,200));
+      }
+      return {profile:null,error:lastError};
+    }
+
+    async function initializeApp() {
+      const authScreen=document.getElementById('authScreen');
+      const authError=document.getElementById('authError');
+      if(!window.supabase || SUPABASE_URL.startsWith('__')) {
+        authError.textContent='Não foi possível conectar o aplicativo.';
+        authScreen.classList.remove('hidden','auth-checking');
+        finishAppStartup();
+        return;
+      }
+      if(!supabaseClient) supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      const recoveryLink=hasRecoveryLink();
+      const {data:{session},error:sessionError}=await supabaseClient.auth.getSession();
+      if(sessionError) {
+        authError.textContent='Não foi possível recuperar seu acesso. Feche e abra o aplicativo novamente.';
+        authScreen.classList.remove('hidden','auth-checking');
+        finishAppStartup();
+        return;
+      }
+      if(recoveryLink) {
+        if(!session) {
+          authError.textContent='Este link de redefinição não é mais válido. Solicite outro link.';
+          authScreen.classList.remove('hidden','auth-checking');
+          finishAppStartup();
+          return;
+        }
+        authScreen.classList.remove('auth-checking');
+        showPasswordRecovery();
+        finishAppStartup();
+        return;
+      }
+      if(!session) {
+        authScreen.classList.remove('hidden','auth-checking');
+        finishAppStartup();
+        return;
+      }
+      const {profile,error:profileError}=await loadActiveProfileWithRetry(session.user.id);
+      if(profileError) {
+        authError.textContent='Não foi possível carregar seu acesso agora. Feche e abra o aplicativo novamente.';
+        authScreen.classList.remove('hidden','auth-checking');
+        finishAppStartup();
+        return;
+      }
+      if(!profile || !profile.active) {
+        await supabaseClient.auth.signOut();
+        authError.textContent='Este acesso não está ativo.';
+        authScreen.classList.remove('hidden','auth-checking');
+        finishAppStartup();
+        return;
+      }
+      currentProfile=profile;
+      try {
+        state.view='Painel';
+        state.filtersOpen=false;
+        state.quickStatuses=[];
+        state.quickClients=[];
+        state.quickClientsOpen=false;
+        await loadCloudData();
+        await migrateLocalData();
+        await loadCloudData();
+        render();
+        subscribeToChanges();
+        await updateAutomaticStatuses();
+        authScreen.classList.add('hidden');
+        authScreen.classList.remove('auth-checking');
+        finishAppStartup();
+      } catch(error) {
+        console.error('Falha ao carregar a base operacional:',error);
+        authError.textContent='Não foi possível abrir o painel agora. Feche e abra o aplicativo novamente.';
+        authScreen.classList.remove('hidden','auth-checking');
+        finishAppStartup();
+      }
+    }
+
+    function startApp() {
+      if(!appInitializationPromise) {
+        appInitializationPromise=initializeApp().finally(()=>{ appInitializationPromise=null; });
+      }
+      return appInitializationPromise;
+    }
+
+        function subscribeToChanges() {
+      if(realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
+      realtimeChannel=supabaseClient.channel('ordem-execucao-atualizacoes')
+        .on('postgres_changes',{event:'*',schema:'public',table:'clients'},refreshFromRealtime)
+        .on('postgres_changes',{event:'*',schema:'public',table:'posts'},refreshFromRealtime)
+        .on('postgres_changes',{event:'*',schema:'public',table:'custom_cards'},refreshFromRealtime)
+        .on('postgres_changes',{event:'*',schema:'public',table:'card_updates'},refreshFromRealtime)
+        .on('postgres_changes',{event:'*',schema:'public',table:'card_notifications'},refreshFromRealtime)
+        .on('postgres_changes',{event:'*',schema:'public',table:'activity_log'},refreshFromRealtime)
+        .on('postgres_changes',{event:'*',schema:'public',table:'profiles'},refreshFromRealtime)
+        .subscribe();
+    }
+    let realtimeTimer;
+    function refreshFromRealtime() { clearTimeout(realtimeTimer); realtimeTimer=setTimeout(async()=>{ await loadCloudData(); render(); },250); }
+
+    async function savePost() {
+      const title=document.getElementById('pTheme').value.trim()||null, status=document.getElementById('pStatus').value;
+      const clientId=document.getElementById('pClient').value, date=document.getElementById('pDate').value, hora=document.getElementById('pTime').value;
+      if(!clientId) return toast('Selecione um cliente.');
+      if(!status) return toast('Selecione a etapa.');
+      if(status==='Programado' && (!date||!hora)) return toast('Postagem programada precisa de data e horário.');
+      const payload={title,client_id:clientId,status,type:document.getElementById('pType').value||null,post_date:date||null,post_time:hora||null,canva:document.getElementById('pCanva').value.trim()||null,legenda:document.getElementById('pCaption').value.trim()||null,notes:document.getElementById('pNotes').value.trim()||null,automatic_status_update:false,updated_by:currentProfile.id};
+      const result=editingPostId ? await supabaseClient.from('posts').update(payload).eq('id',editingPostId) : await supabaseClient.from('posts').insert({...payload,created_by:currentProfile.id});
+      if(result.error) return toast('Não foi possível salvar a postagem.');
+      closeModal('postModal'); editingPostId=null; await loadCloudData(); render(); toast('Postagem salva.');
+    }
+
+    async function deleteCurrentPost() {
+      if(!editingPostId || !confirm('Excluir esta postagem definitivamente?')) return;
+      const {error}=await supabaseClient.from('posts').delete().eq('id',editingPostId);
+      if(error) return toast('Não foi possível excluir a postagem.');
+      closeModal('postModal'); editingPostId=null; await loadCloudData(); render(); toast('Postagem excluída.');
+    }
+
+    async function saveClient() {
+      const name=document.getElementById('cName').value.trim(); if(!name) return toast('Informe o nome do cliente.');
+      const details=clientFields.filter(field=>String(field.value||'').trim()||String(field.label||'').trim()).map(field=>({type:field.type,label:(field.label||'').trim()||null,value:(field.value||'').trim()}));
+      const payload={name,instagram:document.getElementById('cInstagram').value.trim()||null,site:document.getElementById('cSite').value.trim()||null,niche:document.getElementById('cNiche').value.trim()||null,details,color:selectedColor,updated_by:currentProfile.id};
+      const result=editingClientId ? await supabaseClient.from('clients').update(payload).eq('id',editingClientId) : await supabaseClient.from('clients').insert({...payload,created_by:currentProfile.id});
+      if(result.error) return toast('Não foi possível salvar o cliente.');
+      closeModal('clientModal'); editingClientId=null; await loadCloudData(); render(); toast('Cliente salvo.');
+    }
+
+    async function deleteClientFromSettings() {
+      const id=document.getElementById('deleteClientSelect').value, client=getClients().find(item=>item.id===id); if(!client) return;
+      if(!confirm(`Excluir “${client.name}”, todas as postagens, cards e registros vinculados? Esta ação não pode ser desfeita.`)) return;
+      const {error}=await supabaseClient.from('clients').delete().eq('id',id);
+      if(error) return toast('Não foi possível excluir o cliente.');
+      await loadCloudData(); render(); toast('Cliente excluído.');
+    }
+
+    function importBackup(event) {
+      const file=event.target.files[0]; if(!file) return;
+      const reader=new FileReader();
+      reader.onload=async()=>{
+        try {
+          const data=JSON.parse(reader.result);
+          if(!Array.isArray(data.clientes)||!Array.isArray(data.posts)) throw new Error();
+          if(!confirm('Importar este arquivo adicionará estes registros à base compartilhada. Continuar?')) return;
+          const clientMap=new Map();
+          for(const client of data.clientes) {
+            const {data:created,error}=await supabaseClient.from('clients').insert({name:client.name,instagram:client.instagram||null,niche:client.niche||null,color:client.color||COLORS[0],created_by:currentProfile.id,updated_by:currentProfile.id}).select().single();
+            if(error) throw error;
+            clientMap.set(client.id,created.id);
+          }
+          const importedPosts=data.posts.filter(post=>clientMap.has(post.clientId)).map(post=>({title:post.title,client_id:clientMap.get(post.clientId),status:post.status,type:post.type||null,post_date:post.date||null,post_time:post.status==='Programado'?(post.hora||null):null,canva:post.canva||null,legenda:post.legenda||null,notes:post.notes||null,automatic_status_update:false,created_by:currentProfile.id,updated_by:currentProfile.id}));
+          if(importedPosts.length) { const {error}=await supabaseClient.from('posts').insert(importedPosts); if(error) throw error; }
+          await loadCloudData(); render(); toast('Backup importado para a base compartilhada.');
+        } catch { toast('Não foi possível importar este arquivo.'); }
+      };
+      reader.readAsText(file); event.target.value='';
+    }
+
+    function uniqueActivities(items) {
+      const seen=new Set();
+      return items.filter(item=>{
+        const key=[item.actor_id,item.action,item.entity_type,JSON.stringify(item.after_data||item.before_data||{}),item.created_at].join('|');
+        if(seen.has(key)) return false;
+        seen.add(key); return true;
+      });
+    }
+    function activityText(item) {
+      const name=item.after_data?.title||item.before_data?.title||item.after_data?.name||item.before_data?.name||'registro';
+      const actor=item.actor?.display_name||item.actor?.email||'Sistema';
+      const verb={insert:'criou',update:'atualizou',delete:'excluiu'}[item.action]||'alterou';
+      return `${actor} ${verb} ${item.entity_type==='client'?'o cliente':item.entity_type==='card'?'o card':item.entity_type==='profile'?'o perfil':'a postagem'} “${name}”`;
+    }
+    function visibleNotificationActivities() {
+      return cloudActivities.filter(item=>!notificationDismissalIds.has(item.id));
+    }
+    function unreadCardNotifications() {
+      return cloudCardNotifications.filter(item=>item.recipient_id===currentProfile?.id&&!item.read_at);
+    }
+    function renderNotificationCount() {
+      const unreadActivities=visibleNotificationActivities().filter(item=>!activityReadAt||new Date(item.created_at)>new Date(activityReadAt));
+      const unread=unreadActivities.length+unreadCardNotifications().length;
+      const count=document.getElementById('notificationCount');
+      count.textContent=String(Math.min(unread,99)); count.style.display=unread?'block':'none';
+    }
+    async function toggleActivity() {
+      const panel=document.getElementById('activityPanel'); panel.classList.toggle('open');
+      const demands=unreadCardNotifications();
+      const activities=visibleNotificationActivities();
+      panel.innerHTML=`<div class="activity-header">ATUALIZAÇÕES</div>${demands.map(item=>{const card=cloudCards.find(card=>card.id===item.card_id);return `<div class="activity-item demand-item"><strong>${item.type==='aprovacao'?'Aguardando sua aprovação':'Nova ordem de execução'}</strong><button type="button" class="activity-link" onclick="closeActivityAndOpenCard('${item.card_id}')">${escapeHtml(card?.title||'Abrir card')}</button><time>${new Date(item.created_at).toLocaleString('pt-BR')}</time></div>`;}).join('')}${activities.length?activities.map(item=>`<div class="activity-item">${escapeHtml(activityText(item))}<time>${new Date(item.created_at).toLocaleString('pt-BR')}</time></div>`).join(''):(demands.length?'':'<div class="activity-item">Nenhuma atualização registrada.</div>')}`;
+      if(panel.classList.contains('open')&&cloudReady()) {
+        const now=new Date().toISOString();
+        await supabaseClient.from('activity_reads').upsert({user_id:currentProfile.id,last_read_at:now});
+        if(demands.length) await supabaseClient.from('card_notifications').update({read_at:now}).eq('recipient_id',currentProfile.id).is('read_at',null);
+        activityReadAt=now; await loadCloudData(); renderNotificationCount();
+      }
+    }
+    function closeActivityAndOpenCard(cardId) { document.getElementById('activityPanel').classList.remove('open'); openView('Ordem de Execução'); setTimeout(()=>openCardDetail(cardId),0); }
+    function toggleNotificationItem(id,checked) { if(checked) selectedNotificationIds.add(id); else selectedNotificationIds.delete(id); }
+    function renderNotificationClearOptions() {
+      const scope=document.getElementById('notificationClearScope')?.value, holder=document.getElementById('notificationClearOptions');
+      if(!scope||!holder) return;
+      const activities=visibleNotificationActivities();
+      if(scope==='individual') {
+        holder.innerHTML=`<div class="history-clear-list">${activities.length?activities.map(item=>`<label class="activity-item" style="display:block"><input type="checkbox" onchange="toggleNotificationItem('${item.id}',this.checked)"> ${escapeHtml(activityText(item))}<time>${new Date(item.created_at).toLocaleString('pt-BR')}</time></label>`).join(''):'<div class="activity-item">Nenhuma notificação disponível.</div>'}</div><button class="btn btn-danger" type="button" onclick="clearNotifications()">Limpar selecionadas</button>`;
+      } else if(scope==='day') holder.innerHTML='<input class="control" id="notificationClearDay" type="date"><button class="btn btn-danger" type="button" onclick="clearNotifications()">Limpar dia</button>';
+      else if(scope==='month') holder.innerHTML='<input class="control" id="notificationClearMonth" type="month"><button class="btn btn-danger" type="button" onclick="clearNotifications()">Limpar mês</button>';
+      else holder.innerHTML='<button class="btn btn-danger" type="button" onclick="clearNotifications()">Limpar todas as notificações</button>';
+    }
+    async function clearNotifications() {
+      const scope=document.getElementById('notificationClearScope')?.value;
+      let activities=visibleNotificationActivities(), label='';
+      if(scope==='individual') { if(!selectedNotificationIds.size) return toast('Selecione ao menos uma notificação.'); activities=activities.filter(item=>selectedNotificationIds.has(item.id)); label='as notificações selecionadas'; }
+      else if(scope==='day') { const value=document.getElementById('notificationClearDay').value; if(!value) return toast('Escolha o dia.'); activities=activities.filter(item=>item.created_at.slice(0,10)===value); label='as notificações deste dia'; }
+      else if(scope==='month') { const value=document.getElementById('notificationClearMonth').value; if(!value) return toast('Escolha o mês.'); activities=activities.filter(item=>item.created_at.slice(0,7)===value); label='as notificações deste mês'; }
+      else { label='todas as notificações'; }
+      if(!activities.length) return toast('Nenhuma notificação corresponde a essa escolha.');
+      if(!confirm(`Limpar ${label}? O histórico continuará preservado.`)) return;
+      const {error}=await supabaseClient.from('notification_dismissals').upsert(activities.map(item=>({user_id:currentProfile.id,activity_id:item.id})),{onConflict:'user_id,activity_id'});
+      if(error) return toast('Não foi possível limpar as notificações.');
+      selectedNotificationIds=new Set(); await loadCloudData(); render(); toast('Notificações limpas.');
+    }
+    function renderAccessManagement() {
+      const card=document.getElementById('accessManagementCard');
+      if(state.view!=='Configurações' || currentProfile?.role!=='admin') { card.classList.add('hidden'); return; }
+      card.classList.remove('hidden');
+      const list=document.getElementById('accessManagementList');
+      list.innerHTML=cloudProfiles.map(person=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--border)"><button class="account-menu-item" type="button" onclick="openAdminUserProfile('${person.id}')"><span class="profile-avatar">${profileAvatar(person)}</span><span><strong>${escapeHtml(person.display_name||person.email)}</strong><small>${escapeHtml(person.email)}${person.role==='admin'?' · Administradora':''}</small></span></button><span class="settings-actions">${person.id===currentProfile.id?'<span class="badge status-publicado">Seu acesso</span>':`<button class="btn ${person.active?'btn-ghost':'btn-primary'} btn-small" type="button" onclick="setAccessActive('${person.id}',${!person.active})">${person.active?'Pausar':'Ativar'}</button>`}<button class="btn btn-ghost btn-small" type="button" onclick="openAdminUserProfile('${person.id}')">Editar</button></span></div>`).join('')||'<div class="empty-state">Nenhum acesso cadastrado.</div>';
+    }
+
+    async function setAccessActive(userId,active) {
+      const {error}=await supabaseClient.from('profiles').update({active}).eq('id',userId);
+      if(error) return toast('Não foi possível atualizar este acesso.');
+      await loadCloudData(); render(); toast(active?'Acesso ativado.':'Acesso pausado.');
+    }
+
+    async function updateAutomaticStatuses() {
+      if(!cloudReady()) return;
+      const now=new Date();
+      const due=cloudPosts.filter(post=>post.status==='Programado'&&post.date&&post.hora&&new Date(`${post.date}T${post.hora}:00`)<=now);
+      if(!due.length) return;
+      await Promise.all(due.map(post=>supabaseClient.from('posts').update({status:'Publicado',automatic_status_update:true,updated_by:currentProfile.id}).eq('id',post.id)));
+      await loadCloudData(); render();
+    }
+
+    function copyCaption() {
+      const value=document.getElementById('pCaption').value;
+      if(!value) return toast('Não há legenda para copiar.');
+      if(navigator.clipboard?.writeText) navigator.clipboard.writeText(value).then(()=>toast('Legenda copiada.'));
+      else { const el=document.getElementById('pCaption'); el.select(); document.execCommand('copy'); toast('Legenda copiada.'); }
+    }
+
+    function splitCardDateValue(value='') { const [date='',time='']=String(value).split('|'); return {date,time}; }
+    function scheduleCardDraft() { if((editingCardId&&!draftCardId) || !currentProfile) return; clearTimeout(cardDraftTimer); cardDraftTimer=setTimeout(saveCardDraft,700); }
+    async function saveCardDraft() {
+      const fields=cardFields.filter(field=>String(field.value||'').trim()||String(field.label||'').trim()).map(field=>({type:field.type,label:(field.label||'').trim()||null,value:(field.value||'').trim()}));
+      const payload={title:document.getElementById('cardTitle').value.trim()||null,client_id:document.getElementById('cardClient').value||null,responsible_id:document.getElementById('cardResponsible').value||null,stage:document.getElementById('cardStatus').value||null,observations:document.getElementById('cardObservations').value.trim()||null,fields,updated_by:currentProfile.id,is_draft:true};
+      if(!payload.title&&!payload.client_id&&!payload.responsible_id&&!payload.stage&&!payload.observations&&!fields.length) return;
+      const result=draftCardId ? await supabaseClient.from('custom_cards').update(payload).eq('id',draftCardId).select().single() : await supabaseClient.from('custom_cards').insert({...payload,created_by:currentProfile.id}).select().single();
+      if(!result.error&&result.data) { draftCardId=result.data.id; editingCardId=result.data.id; document.getElementById('customCardModalTitle').textContent='Rascunho do card'; }
+    }
+    function touchCardDraft() { scheduleCardDraft(); }
+    function renderCustomCardFields() {
+      const holder=document.getElementById('customCardFields');
+      holder.innerHTML=cardFields.map(field=>{
+        const remove=editingCardId?`<button class="field-remove-link" type="button" onclick="removeCustomCardField('${field.id}')">Remover campo</button>`:'';
+        if(field.type==='text') return `<div class="custom-field-card"><label>Título</label><input class="control" type="text" value="${escapeHtml(field.label||'')}" oninput="updateCustomCardField('${field.id}','label',this.value);touchCardDraft()"><label>Texto</label><div class="card-text-wrap"><textarea class="control" oninput="updateCustomCardField('${field.id}','value',this.value);touchCardDraft()">${escapeHtml(field.value||'')}</textarea><button class="btn btn-ghost caption-copy" type="button" onclick="copyCardField('${field.id}')">Copiar</button></div>${remove}</div>`;
+        if(field.type==='date') { const value=splitCardDateValue(field.value); return `<div class="custom-field-card"><div class="custom-date-inputs"><input class="control" type="date" value="${escapeHtml(value.date)}" onchange="updateCustomCardDateField('${field.id}','date',this.value);touchCardDraft()"><input class="control" type="time" value="${escapeHtml(value.time)}" onchange="updateCustomCardDateField('${field.id}','time',this.value);touchCardDraft()"></div>${remove}</div>`; }
+        return `<div class="custom-field-card"><input class="control" type="url" aria-label="Link" placeholder="https://" value="${escapeHtml(field.value||'')}" oninput="updateCustomCardField('${field.id}','value',this.value);touchCardDraft()">${remove}</div>`;
+      }).join('');
+    }
+    function addCustomCardField(type) { cardFields.push({id:`${Date.now()}-${Math.random()}`,type,label:'',value:''}); renderCustomCardFields(); touchCardDraft(); }
+    function updateCustomCardField(id,key,value) { const field=cardFields.find(item=>item.id===id); if(field) field[key]=value; }
+    function updateCustomCardDateField(id,part,value) { const field=cardFields.find(item=>item.id===id); if(!field) return; const parsed=splitCardDateValue(field.value); parsed[part]=value; field.value=parsed.date+(parsed.time?'|'+parsed.time:''); }
+    function copyCardField(id) { const field=cardFields.find(item=>item.id===id); if(!field?.value) return toast('Não há texto para copiar.'); navigator.clipboard?.writeText(field.value).then(()=>toast('Texto copiado.')).catch(()=>toast('Não foi possível copiar o texto.')); }
+    function removeCustomCardField(id) { if(!editingCardId) return; if(!confirm('Remover este campo ao salvar a edição?')) return; cardFields=cardFields.filter(item=>item.id!==id); renderCustomCardFields(); }
+    function stageLabel(stage) { return ({rascunho:'Rascunho',criar:'Criar',conferir:'Conferir',refinar:'Refinar',pronto:'Pronto',programar:'Programar',programado:'Programado',publicado:'Publicado',concluido:'Concluído'})[stage]||'Sem status'; }
+    function getCardClient(card) { return getClients().find(client=>client.id===card.client_id)||null; }
+    function cardOwner(card) { return cloudProfiles.find(person=>person.id===card.created_by)||null; }
+    function canEditCardOrientation(card) { return currentProfile?.role==='admin' || card.created_by===currentProfile?.id; }
+    function fillCardSelects(card=null,preselectedClientId='') {
+      const clientSelect=document.getElementById('cardClient'), responsibleSelect=document.getElementById('cardResponsible');
+      clientSelect.innerHTML='<option value="">Cliente</option>'+getClients().map(client=>`<option value="${client.id}">${escapeHtml(client.name)}</option>`).join('');
+      responsibleSelect.innerHTML='<option value="">Responsável</option>'+cloudProfiles.filter(person=>person.active).map(person=>`<option value="${person.id}">${escapeHtml(person.display_name||person.email)}</option>`).join('');
+      clientSelect.value=card?.client_id||preselectedClientId||''; responsibleSelect.value=card?.responsible_id||'';
+    }
+    function openCustomCardModal(preselectedClientId='',cardId=null) {
+      editingCardId=cardId; draftCardId=null; const card=cardId?cloudCards.find(item=>item.id===cardId):null; if(card?.is_draft) draftCardId=card.id;
+      if(cardId&&!card) return;
+      if(card&&!canEditCardOrientation(card)) return toast('A observação só pode ser alterada por quem criou o card ou pela administradora.');
+      document.getElementById('customCardModalTitle').textContent=card?'Editar card':'Novo card';
+      fillCardSelects(card,preselectedClientId);
+      document.getElementById('cardTitle').value=card?.title||'';
+      document.getElementById('cardStatus').value=card?.stage||'';
+      document.getElementById('cardObservations').value=card?.observations||'';
+      cardFields=(card?.fields||[]).map(field=>({id:`${Date.now()}-${Math.random()}`,type:field.type,label:field.label||'',value:field.value||''}));
+      renderCustomCardFields(); document.getElementById('customCardModal').classList.add('open');
+      if(!card) ['cardTitle','cardClient','cardResponsible','cardStatus','cardObservations'].forEach(id=>{ const field=document.getElementById(id); field.oninput=touchCardDraft; field.onchange=touchCardDraft; });
+    }
+    async function notifyCardRecipient(cardId,recipientId,notificationType) { if(!recipientId||recipientId===currentProfile.id) return; await supabaseClient.from('card_notifications').insert({card_id:cardId,recipient_id:recipientId,notification_type:notificationType,created_by:currentProfile.id}); }
+    async function saveCustomCard() {
+      const fields=cardFields.filter(field=>String(field.value||'').trim()||String(field.label||'').trim()).map(field=>({type:field.type,label:(field.label||'').trim()||null,value:(field.value||'').trim()}));
+      const payload={title:document.getElementById('cardTitle').value.trim()||null,client_id:document.getElementById('cardClient').value||null,responsible_id:document.getElementById('cardResponsible').value||null,stage:document.getElementById('cardStatus').value||null,observations:document.getElementById('cardObservations').value.trim()||null,fields,updated_by:currentProfile.id,is_draft:false};
+      let cardId=editingCardId, previousResponsible='';
+      if(editingCardId) { const existing=cloudCards.find(card=>card.id===editingCardId); previousResponsible=existing?.responsible_id||''; const {error}=await supabaseClient.from('custom_cards').update(payload).eq('id',editingCardId); if(error) return toast('Não foi possível salvar o card.'); }
+      else { const {data,error}=await supabaseClient.from('custom_cards').insert({...payload,created_by:currentProfile.id}).select().single(); if(error) return toast('Não foi possível salvar o card.'); cardId=data.id; }
+      if(payload.responsible_id&&payload.responsible_id!==previousResponsible) await notifyCardRecipient(cardId,payload.responsible_id,'demanda');
+      document.getElementById('customCardModal').classList.remove('open'); editingCardId=null; draftCardId=null; await loadCloudData(); render(); toast('Card salvo.');
+    }
+    function renderCardSummary(card) {
+      const client=getCardClient(card), responsible=cloudProfiles.find(person=>person.id===card.responsible_id), color=client?.color||'var(--cyan)';
+      return `<button class="custom-card" type="button" style="border-left-color:${escapeHtml(color)}" onclick="openCardDetail('${card.id}')"><h4>${escapeHtml(card.title||'Sem título')}</h4><div class="card-client-name" style="color:${escapeHtml(color)}">${escapeHtml(client?.name||'Sem cliente vinculado')}</div><time>Registrado em ${new Date(card.created_at).toLocaleString('pt-BR')}</time><div class="card-meta">${card.is_draft?'<span class="badge">Rascunho</span>':''}${card.stage?`<span class="badge">${stageLabel(card.stage)}</span>`:''}${responsible?`<span class="badge">${escapeHtml(responsible.display_name||responsible.email)}</span>`:''}</div></button>`;
+    }
+    function renderCustomCards() {
+      const section=document.getElementById('customCardsSection');
+      const inPanel=state.view==='Painel';
+      const inClient=state.view==='Todos'&&Boolean(state.clientId);
+      const cardStage=String(state.view||'').toLowerCase();
+      const isWorkflowStage=STATUSES.map(status=>status.toLowerCase()).includes(cardStage);
+      if(inPanel&&!state.quickStatuses.length) { section.classList.add('hidden'); return; }
+      if(!inPanel&&!isWorkflowStage&&!inClient) { section.classList.add('hidden'); return; }
+
+      let cards=cloudCards.slice();
+      if(inPanel) {
+        const selectedStages=state.quickStatuses.map(status=>status.toLowerCase());
+        cards=cards.filter(card=>selectedStages.includes(card.stage)||(selectedStages.includes('criar')&&card.is_draft));
+        if(state.quickClients.length) cards=cards.filter(card=>state.quickClients.includes(card.client_id));
+        cards=cards.filter(card=>isInVisibleCalendarPeriod(card.created_at));
+        document.getElementById('customCardsHeading').textContent='Cards';
+      } else if(inClient) {
+        cards=cards.filter(card=>card.client_id===state.clientId);
+        document.getElementById('customCardsHeading').textContent='Cards do cliente';
+      } else {
+        cards=cards.filter(card=>card.stage===cardStage||(cardStage==='criar'&&card.is_draft&&card.created_by===currentProfile?.id));
+        document.getElementById('customCardsHeading').textContent=`Cards — ${stageLabel(cardStage)}`;
+      }
+      cards.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+      section.classList.remove('hidden');
+      const grid=document.getElementById('customCardsGrid');
+      grid.innerHTML=cards.length?cards.map(renderCardSummary).join(''):`<div class="empty-state"><strong>Nenhum card encontrado</strong><span>Não há cards com estas seleções no período exibido.</span></div>`;
+    }
+    function cardFieldsHtml(card) { return (card.fields||[]).map(field=>{ if(field.type==='link') { const url=safeUrl(field.value); return url?`<p><a href="${url}" target="_blank" rel="noopener">Abrir link</a></p>`:''; } if(field.type==='date') { const value=splitCardDateValue(field.value); return value.date?`<p>${formatDate(value.date)}${value.time?` · ${escapeHtml(value.time)}`:''}</p>`:''; } return `<p>${escapeHtml(field.value)}</p>`; }).join(''); }
+    function openCardDetail(cardId) {
+      const card=cloudCards.find(item=>item.id===cardId); if(!card) return;
+      const client=getCardClient(card),owner=cardOwner(card),responsible=cloudProfiles.find(person=>person.id===card.responsible_id),color=client?.color||'var(--cyan)',updates=cloudCardUpdates.filter(item=>item.card_id===card.id),canEdit=canEditCardOrientation(card);
+      document.getElementById('cardDetailTitle').textContent=card.title||'Card';
+      document.getElementById('cardDetailContent').innerHTML=`<div class="card-client-name" style="color:${escapeHtml(color)}">${escapeHtml(client?.name||'Sem cliente vinculado')}</div><p style="margin-top:8px;color:var(--muted)">Criado por ${escapeHtml(owner?.display_name||owner?.email||'Usuária removida')} em ${new Date(card.created_at).toLocaleString('pt-BR')}</p><div class="card-detail-section"><h4>Observação</h4>${card.observations?`<p>${escapeHtml(card.observations)}</p>`:''}${cardFieldsHtml(card)}${canEdit?`<button class="btn btn-ghost btn-small" type="button" onclick="closeModal('cardDetailModal');openCustomCardModal('', '${card.id}')">Editar orientação</button>`:''}</div><div class="card-detail-section"><h4>Andamento</h4><div class="form-grid"><div class="field form-group"><label for="cardStageAction">Status</label><select class="control" id="cardStageAction"><option value=""></option><option value="criar">Criar</option><option value="conferir">Conferir</option><option value="refinar">Refinar</option><option value="programado">Programado</option><option value="publicado">Publicado</option><option value="concluido">Concluído</option></select></div><div class="field form-group"><label>Responsável</label><div class="control" style="display:flex;align-items:center">${escapeHtml(responsible?.display_name||responsible?.email||'Sem responsável')}</div></div><div class="field form-group full"><label for="cardProgressText">Registrar execução ou observação</label><textarea class="control" id="cardProgressText"></textarea></div></div><div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal('cardDetailModal')">Fechar</button><button class="btn btn-primary" type="button" onclick="saveCardProgress('${card.id}')">Registrar atualização</button></div></div><div class="card-detail-section"><h4>Histórico do card</h4><div class="card-history">${updates.length?updates.map(update=>`<div class="card-history-item"><strong>${escapeHtml(update.author?.display_name||update.author?.email||'Usuária')}</strong> ${update.action_type==='mudanca_de_etapa'?`moveu de ${stageLabel(update.from_stage)} para ${stageLabel(update.to_stage)}`:(update.action_type==='execucao'?'registrou uma execução':'adicionou uma observação')}${update.content?`<p>${escapeHtml(update.content)}</p>`:''}<time>${new Date(update.created_at).toLocaleString('pt-BR')}</time></div>`).join(''):'<p>Nenhuma atualização registrada.</p>'}</div></div>`;
+      document.getElementById('cardStageAction').value=card.stage||'criar'; document.getElementById('cardDetailModal').classList.add('open');
+    }
+    async function saveCardProgress(cardId) {
+      const card=cloudCards.find(item=>item.id===cardId); if(!card) return;
+      const toStage=document.getElementById('cardStageAction').value,content=document.getElementById('cardProgressText').value.trim(),changedStage=(card.stage||'')!==toStage;
+      if(!content&&!changedStage) return toast('Registre uma observação ou escolha outra etapa.');
+      const {error}=await supabaseClient.from('card_updates').insert({card_id:cardId,author_id:currentProfile.id,action_type:changedStage?'mudanca_de_etapa':'observacao',content:content||null,from_stage:changedStage?(card.stage||null):null,to_stage:changedStage?(toStage||null):null});
+      if(error) return toast('Não foi possível atualizar o card.');
+      if(changedStage&&toStage==='conferir') await notifyCardRecipient(cardId,card.created_by,'aprovacao');
+      closeModal('cardDetailModal'); await loadCloudData(); render(); toast('Atualização registrada.');
+    }
+    function renderOrderExecution() {
+      const section=document.getElementById('orderExecutionSection'); if(state.view!=='Ordem de Execução') { section.classList.add('hidden'); return; } section.classList.remove('hidden');
+      const cards=cloudCards.filter(card=>card.created_by===currentProfile?.id||card.responsible_id===currentProfile?.id),list=document.getElementById('orderExecutionList');
+      document.getElementById('orderExecutionCount').textContent=`${cards.length} demanda${cards.length===1?'':'s'}`;
+      list.innerHTML=cards.length?cards.map(card=>{ const client=getCardClient(card),color=client?.color||'var(--cyan)',approval=(card.stage==='conferir'&&card.created_by===currentProfile?.id); return `<article class="execution-card" style="border-left-color:${escapeHtml(color)}"><h4>${escapeHtml(card.title||'Sem título')}</h4><p style="color:${escapeHtml(color)}">${escapeHtml(client?.name||'Sem cliente vinculado')}</p><p>${approval?'Aguardando sua aprovação':`Etapa: ${stageLabel(card.stage)}`}</p><button class="btn btn-ghost btn-small" type="button" onclick="openCardDetail('${card.id}')">Abrir</button></article>`; }).join(''):'<div class="empty-state"><strong>Nenhuma demanda relacionada a você</strong></div>';
+    }
+    async function clearNotifications() {
+      await supabaseClient.from('activity_reads').upsert({user_id:currentProfile.id,last_read_at:new Date().toISOString()});
+      activityReadAt=new Date().toISOString(); renderNotificationCount(); toast('Notificações limpas.');
+    }
+    function toggleHistoryItem(id,checked) {
+      if(checked) selectedHistoryIds.add(id); else selectedHistoryIds.delete(id);
+    }
+    function renderHistoryClearOptions() {
+      const scope=document.getElementById('historyClearScope')?.value;
+      const holder=document.getElementById('historyClearOptions');
+      if(!scope || !holder) return;
+      if(scope==='individual') {
+        holder.innerHTML=`<div class="history-clear-list">${cloudActivities.length?cloudActivities.map(item=>`<label class="activity-item" style="display:block"><input type="checkbox" onchange="toggleHistoryItem('${item.id}',this.checked)"> ${escapeHtml(activityText(item))}<time>${new Date(item.created_at).toLocaleString('pt-BR')}</time></label>`).join(''):'<div class="activity-item">Nenhuma atualização registrada.</div>'}</div><button class="btn btn-danger" type="button" onclick="clearHistory()">Limpar selecionadas</button>`;
+      } else if(scope==='day') {
+        holder.innerHTML='<input class="control" id="historyClearDay" type="date"><button class="btn btn-danger" type="button" onclick="clearHistory()">Limpar dia</button>';
+      } else if(scope==='month') {
+        holder.innerHTML='<input class="control" id="historyClearMonth" type="month"><button class="btn btn-danger" type="button" onclick="clearHistory()">Limpar mês</button>';
+      } else {
+        holder.innerHTML='<button class="btn btn-danger" type="button" onclick="clearHistory()">Limpar todo o histórico</button>';
+      }
+    }
+    async function clearHistory() {
+      const scope=document.getElementById('historyClearScope').value;
+      let query=supabaseClient.from('activity_log').delete(), label='';
+      if(scope==='individual') {
+        if(!selectedHistoryIds.size) return toast('Selecione ao menos uma atualização.');
+        query=query.in('id',[...selectedHistoryIds]); label='as atualizações selecionadas';
+      } else if(scope==='day') {
+        const value=document.getElementById('historyClearDay').value; if(!value) return toast('Escolha o dia.');
+        const start=new Date(`${value}T00:00:00-03:00`), end=new Date(start); end.setDate(end.getDate()+1);
+        query=query.gte('created_at',start.toISOString()).lt('created_at',end.toISOString()); label='as atualizações deste dia';
+      } else if(scope==='month') {
+        const value=document.getElementById('historyClearMonth').value; if(!value) return toast('Escolha o mês.');
+        const [year,month]=value.split('-').map(Number), nextMonth=month===12?1:month+1, nextYear=month===12?year+1:year;
+        query=query.gte('created_at',`${year}-${String(month).padStart(2,'0')}-01T00:00:00-03:00`).lt('created_at',`${nextYear}-${String(nextMonth).padStart(2,'0')}-01T00:00:00-03:00`); label='as atualizações deste mês';
+      } else { query=query.not('id','is',null); label='todo o histórico'; }
+      if(!confirm(`Limpar ${label}? Esta ação não pode ser desfeita.`)) return;
+      const {error}=await query;
+      if(error) return toast('Não foi possível limpar o histórico.');
+      selectedHistoryIds=new Set(); await loadCloudData(); render(); toast('Histórico limpo.');
+    }
+    function updateLiveClock() {
+      const clock=document.getElementById('headerClock');
+      const now=new Date(), day=String(now.getDate()).padStart(2,'0'), month=MONTHS[now.getMonth()], time=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      clock.textContent=`${day} ${month} ${now.getFullYear()} | ${time}`;
+    }
+    function render() { updateAutomaticStatuses(); renderNav(); populateFilterOptions(); renderFilterControls(); renderMainContent(); renderCustomCards(); renderAccessManagement(); renderHeaderUser(); renderNotificationCount(); updateLiveClock(); }
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay=>overlay.addEventListener('click',event=>{ if(event.target===overlay && overlay.id!=='customCardModal') closeModal(overlay.id); }));
+    document.addEventListener('click',event=>{ const menu=document.getElementById('accountMenu'), button=document.getElementById('accountButton'); if(menu?.classList.contains('open') && !menu.contains(event.target) && event.target!==button) closeAccountMenu(); });
+    document.addEventListener('keydown',event=>{ if(event.key==='Escape') { document.querySelectorAll('.modal-overlay.open').forEach(modal=>{if(modal.id!=='customCardModal')closeModal(modal.id);}); closeAccountMenu(); } });
+    startApp(); setInterval(updateAutomaticStatuses,60000); setInterval(updateLiveClock,1000);
+  </script>
+
+<style id="client-workspace-styles">
+.client-workspace{padding:0 0 42px}.client-workspace.hidden{display:none}.client-workspace-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:22px}.client-workspace-title{display:flex;gap:11px;align-items:center}.client-workspace-title h2{margin:0}.client-workspace-contact{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0 22px}.client-workspace-contact a,.client-workspace-contact span{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:13px}.client-workspace-contact svg{width:15px;height:15px}.client-cards-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:14px}.client-cards-header h3{margin:0}.client-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}.client-card-note{color:var(--muted);font-size:13px;line-height:1.45;white-space:pre-wrap}.profile-cropper{width:220px;height:220px;overflow:hidden;border-radius:12px;border:1px solid var(--border);background:#070808;touch-action:none;position:relative;cursor:grab}.profile-cropper:active{cursor:grabbing}.profile-cropper img{width:100%;height:100%;object-fit:cover;pointer-events:none;transform-origin:center;will-change:transform}.profile-photo-editor{display:flex;gap:16px;align-items:center}.profile-photo-editor label{flex:1}.client-card-modal .modal{width:min(680px,100%)}@media(max-width:700px){.client-workspace-head{align-items:stretch;flex-direction:column}.profile-photo-editor{align-items:stretch;flex-direction:column}}
+</style>
+
+<div class="modal-overlay client-card-modal" id="clientCardModal" role="dialog" aria-modal="true" aria-labelledby="clientCardModalTitle"><div class="modal"><div class="modal-title" id="clientCardModalTitle">Novo card</div><div class="form-grid"><div class="field form-group full"><label for="clientCardTitle">Título</label><input class="control" id="clientCardTitle" type="text"></div><div class="field form-group full"><label for="clientCardObservation">Observação</label><textarea class="control" id="clientCardObservation"></textarea></div></div><div id="clientCardFields"></div><div class="field-actions"><button class="btn btn-ghost btn-small" type="button" onclick="addClientCardField('text')">+ Texto</button><button class="btn btn-ghost btn-small" type="button" onclick="addClientCardField('date')">+ Data</button><button class="btn btn-ghost btn-small" type="button" onclick="addClientCardField('link')">+ Link</button></div><div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal('clientCardModal')">Cancelar</button><button class="btn btn-primary" type="button" onclick="saveClientCard()">Salvar card</button></div></div></div>
+<script id="client-workspace-script">
+const _baseLoadCloudData=loadCloudData, _baseRenderMainContent=renderMainContent, _baseProfileForm=profileForm;
+let cloudClientCards=[], editingClientCardId=null, clientCardFields=[];
+async function loadCloudDataWithClientCards(){
+  await _baseLoadCloudData();
+  const res=await supabaseClient.from('client_cards').select('*').order('created_at',{ascending:true});
+  if(res.error) throw cloudLoadError('Cards dos clientes',res.error);
+  cloudClientCards=res.data||[];
+}
+window.loadCloudData=loadCloudDataWithClientCards;
+function clientForActivity(id){return getClients().find(c=>c.id===id);}
+function formatActivityDate(date,time){if(!date)return '';const d=formatDate(date);return time?`${d} às ${String(time).slice(0,5)}`:d;}
+function activityText(item){
+ const after=item.after_data||{}, before=item.before_data||{}, actor=item.actor?.display_name||item.actor?.email||'Sistema';
+ const type=item.entity_type, title=after.title||before.title||after.name||before.name||'sem título';
+ const entity=type==='client'?'cliente':type==='card'?'card':type==='client_card'?'card do cliente':type==='profile'?'perfil':'postagem';
+ const labels={name:'nome',instagram:'Instagram',site:'site',niche:'nicho',color:'cor de identificação',details:'informações personalizadas',display_name:'nome de usuário',phone:'WhatsApp',avatar_url:'foto de perfil',avatar_x:'foto de perfil',avatar_y:'foto de perfil',avatar_zoom:'foto de perfil',title:'título',client_id:'cliente',responsible_id:'responsável',stage:'status',status:'status',post_date:'data',post_time:'horário',type:'tipo',canva:'link da arte',legenda:'legenda',notes:'observações',observations:'observação',fields:'campos personalizados'};
+ const changed=Object.keys(after).filter(k=>k!=='updated_at'&&k!=='updated_by'&&k!=='created_at'&&k!=='id'&&JSON.stringify(after[k])!==JSON.stringify(before[k]));
+ if(item.action==='insert'){
+   if(type==='post'&&after.status==='Programado'){const client=clientForActivity(after.client_id);return `${actor} programou a postagem “${title}” para ${client?.name||'cliente não identificado'} em ${formatActivityDate(after.post_date,after.post_time)}.`;}
+   return `${actor} criou ${type==='post'?'a':'o'} ${entity} “${title}”.`;
+ }
+ if(item.action==='delete')return `${actor} excluiu ${type==='post'?'a':'o'} ${entity} “${title}”.`;
+ const statusKey=type==='post'?'status':type==='card'?'stage':null;
+ if(statusKey&&changed.includes(statusKey))return `${actor} mudou o status d${type==='post'?'a postagem':'o card'} “${title}” para ${stageLabel(after[statusKey])}.`;
+ const unique=[...new Set(changed.map(k=>labels[k]).filter(Boolean))];
+ if(!unique.length)return `${actor} alterou ${type==='post'?'a':'o'} ${entity} “${title}”.`;
+ return `${actor} alterou ${unique.join(', ')} d${type==='post'?'a':'o'} ${entity} “${title}”.`;
+}
+function openClientWorkspace(id){if(!getClients().some(c=>c.id===id))return;state.clientWorkspaceId=id;state.clientId='';render();}
+function closeClientWorkspace(){state.clientWorkspaceId='';openView('Clientes');}
+function renderClientWorkspace(){
+ const section=document.getElementById('clientWorkspaceSection'), client=getClients().find(c=>c.id===state.clientWorkspaceId);
+ if(!client){section.classList.add('hidden');return;}
+ ['summaryGrid','clientsSection','calendarSection','postsSection','customCardsSection','orderExecutionSection','settingsSection','filterPanel','filterActions'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+ document.querySelector('.page-header')?.classList.add('hidden');section.classList.remove('hidden');
+ document.getElementById('workspaceClientName').textContent=client.name;document.getElementById('workspaceClientNiche').textContent=client.niche||'';document.getElementById('workspaceClientDot').style.background=client.color||'var(--cyan)';
+ const instagram=safeUrl(client.instagram),site=safeUrl(client.site);
+ document.getElementById('workspaceClientContact').innerHTML=`${instagram?`<a href="${instagram}" target="_blank" rel="noopener">${contactIcon('instagram')} Instagram</a>`:''}${site?`<a href="${site}" target="_blank" rel="noopener">Site</a>`:''}`;
+ const cards=cloudClientCards.filter(c=>c.client_id===client.id);document.getElementById('clientCardsGrid').innerHTML=cards.length?cards.map(renderClientCardSummary).join(''):'<div class="empty-state"><strong>Nenhum card criado</strong><span>Use “Novo card” para montar as informações deste cliente.</span></div>';
+}
+window.renderMainContent=function renderMainContentWithClientWorkspace(){if(state.clientWorkspaceId){renderClientWorkspace();return;}_baseRenderMainContent();document.getElementById('clientWorkspaceSection')?.classList.add('hidden');};
+function fieldData(fields){return fields.filter(f=>String(f.value||'').trim()||String(f.label||'').trim()).map(f=>({type:f.type,label:(f.label||'').trim()||null,value:(f.value||'').trim()}));}
+function renderClientCardFields(){const h=document.getElementById('clientCardFields');if(!h)return;h.innerHTML=clientCardFields.map(f=>{const remove=`<button type="button" class="field-remove-link" onclick="removeClientCardField('${f.id}')">Remover campo</button>`;if(f.type==='text')return `<div class="custom-field-card"><label>Título</label><input class="control" value="${escapeHtml(f.label||'')}" oninput="updateClientCardField('${f.id}','label',this.value)"><label>Texto</label><textarea class="control" oninput="updateClientCardField('${f.id}','value',this.value)">${escapeHtml(f.value||'')}</textarea>${remove}</div>`;if(f.type==='link')return `<div class="custom-field-card"><label>Link</label><input class="control" type="url" placeholder="https://" value="${escapeHtml(f.value||'')}" oninput="updateClientCardField('${f.id}','value',this.value)">${remove}</div>`;const x=splitCardDateValue(f.value);return `<div class="custom-field-card"><div class="custom-date-inputs"><input class="control native-picker" type="date" value="${escapeHtml(x.date)}" onchange="updateClientCardDateField('${f.id}','date',this.value)"><input class="control native-picker" type="time" value="${escapeHtml(x.time)}" onchange="updateClientCardDateField('${f.id}','time',this.value)"></div>${remove}</div>`;}).join('');}
+function addClientCardField(type){clientCardFields.push({id:`cc-${Date.now()}-${Math.random()}`,type,label:'',value:''});renderClientCardFields();}
+function updateClientCardField(id,key,value){const f=clientCardFields.find(x=>x.id===id);if(f)f[key]=value;}
+function updateClientCardDateField(id,key,value){const f=clientCardFields.find(x=>x.id===id);if(!f)return;const x=splitCardDateValue(f.value);x[key]=value;f.value=[x.date,x.time].filter(Boolean).join('T');}
+function removeClientCardField(id){clientCardFields=clientCardFields.filter(f=>f.id!==id);renderClientCardFields();}
+function clientCardFieldsHtml(card){return (card.fields||[]).map(f=>f.type==='link'?(safeUrl(f.value)?`<p><a href="${safeUrl(f.value)}" target="_blank" rel="noopener">Abrir link</a></p>`:''):f.type==='date'?(`<p>${formatDate(splitCardDateValue(f.value).date)}${splitCardDateValue(f.value).time?' · '+escapeHtml(splitCardDateValue(f.value).time):''}</p>`):`<p>${escapeHtml(f.value||'')}</p>`).join('');}
+function renderClientCardSummary(card){return `<button class="custom-card" type="button" onclick="openClientCardModal('${card.id}')"><strong>${escapeHtml(card.title||'Card sem título')}</strong>${card.observations?`<span class="client-card-note">${escapeHtml(card.observations)}</span>`:''}${clientCardFieldsHtml(card)}</button>`;}
+function openClientCardModal(id=null){editingClientCardId=id;const card=id?cloudClientCards.find(c=>c.id===id):null;if(id&&!card)return;document.getElementById('clientCardModalTitle').textContent=card?'Editar card':'Novo card';document.getElementById('clientCardTitle').value=card?.title||'';document.getElementById('clientCardObservation').value=card?.observations||'';clientCardFields=(card?.fields||[]).map(f=>({...f,id:`cc-${Date.now()}-${Math.random()}`}));renderClientCardFields();document.getElementById('clientCardModal').classList.add('open');}
+async function saveClientCard(){const clientId=state.clientWorkspaceId;if(!clientId)return;const p={client_id:clientId,title:document.getElementById('clientCardTitle').value.trim()||null,observations:document.getElementById('clientCardObservation').value.trim()||null,fields:fieldData(clientCardFields),updated_by:currentProfile.id};const q=editingClientCardId?supabaseClient.from('client_cards').update(p).eq('id',editingClientCardId):supabaseClient.from('client_cards').insert({...p,created_by:currentProfile.id});const {error}=await q;if(error)return toast('Não foi possível salvar o card do cliente.');closeModal('clientCardModal');await loadCloudData();render();toast('Card salvo.');}
+function cardDraftPayload(){return {title:document.getElementById('cardTitle').value.trim()||null,client_id:document.getElementById('cardClient').value||null,responsible_id:document.getElementById('cardResponsible').value||null,stage:document.getElementById('cardStatus').value||null,observations:document.getElementById('cardObservations').value.trim()||null,fields:fieldData(cardFields),updated_by:currentProfile.id,is_draft:true};}
+function scheduleCardDraft(){if((editingCardId&&!draftCardId)||!currentProfile)return;clearTimeout(cardDraftTimer);cardDraftTimer=setTimeout(()=>saveCardDraft(),600);}
+async function saveCardDraft(){const payload=cardDraftPayload();if(!payload.title&&!payload.client_id&&!payload.responsible_id&&!payload.stage&&!payload.observations&&!payload.fields.length)return true;const q=draftCardId?supabaseClient.from('custom_cards').update(payload).eq('id',draftCardId).select().single():supabaseClient.from('custom_cards').insert({...payload,created_by:currentProfile.id}).select().single();const {data,error}=await q;if(error)return false;draftCardId=data.id;editingCardId=data.id;document.getElementById('customCardModalTitle').textContent='Rascunho do card';return true;}
+async function closeCustomCardToDraft(){if(editingCardId&&!draftCardId){document.getElementById('customCardModal').classList.remove('open');return;}const ok=await saveCardDraft();if(!ok)return toast('Não foi possível salvar o rascunho.');document.getElementById('customCardModal').classList.remove('open');await loadCloudData();render();toast('Rascunho salvo.');}
+async function saveCustomCard(){const payload={...cardDraftPayload(),is_draft:false};let cardId=editingCardId,previousResponsible='';if(editingCardId){const current=cloudCards.find(c=>c.id===editingCardId);previousResponsible=current?.responsible_id||'';const {error}=await supabaseClient.from('custom_cards').update(payload).eq('id',editingCardId);if(error)return toast('Não foi possível salvar o card.');}else{const {data,error}=await supabaseClient.from('custom_cards').insert({...payload,created_by:currentProfile.id}).select().single();if(error)return toast('Não foi possível salvar o card.');cardId=data.id;}if(payload.responsible_id&&payload.responsible_id!==previousResponsible)await notifyCardRecipient(cardId,payload.responsible_id,'demanda');document.getElementById('customCardModal').classList.remove('open');editingCardId=null;draftCardId=null;await loadCloudData();render();toast('Card salvo.');}
+function selectProfilePhoto(file){if(!file)return;if(!file.type.startsWith('image/'))return toast('Escolha uma imagem.');if(file.size>5*1024*1024)return toast('A foto deve ter até 5 MB.');pendingProfilePhoto=file;profilePhotoDraftUrl=URL.createObjectURL(file);window._crop={x:50,y:50,zoom:1};document.getElementById('profilePhotoEditor')?.classList.remove('hidden');previewProfilePhoto();}
+function previewProfilePhoto(){const crop=window._crop||{x:50,y:50,zoom:1},src=profilePhotoDraftUrl||(cloudProfiles.find(p=>p.id===profileEditingId)?.avatar_url)||currentProfile?.avatar_url;const img=document.getElementById('profileCropImage'),preview=document.getElementById('profileAvatarPreview');if(img&&src){img.src=src;img.style.transform=`translate(${(50-crop.x)*.8}%,${(50-crop.y)*.8}%) scale(${crop.zoom})`;}if(preview&&src)preview.innerHTML=`<img src="${escapeHtml(src)}" alt="" style="object-position:${crop.x}% ${crop.y}%;transform:scale(${crop.zoom})">`;}
+function setProfileCropZoom(v){window._crop=window._crop||{x:50,y:50,zoom:1};window._crop.zoom=Number(v);previewProfilePhoto();}
+function beginProfilePhotoDrag(e){const c=window._crop||{x:50,y:50,zoom:1},start={x:e.clientX,y:e.clientY,cx:c.x,cy:c.y};const move=x=>{c.x=Math.max(0,Math.min(100,start.cx-(x.clientX-start.x)/2));c.y=Math.max(0,Math.min(100,start.cy-(x.clientY-start.y)/2));window._crop=c;previewProfilePhoto();};const end=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',end);};window.addEventListener('pointermove',move);window.addEventListener('pointerup',end);e.preventDefault();}
+function profileValues(){const b={display_name:document.getElementById('profileDisplayName').value.trim()||null,phone:(document.getElementById('profilePhone').value||'').replace(/\D/g,'')||null,instagram:(document.getElementById('profileInstagram').value||'').trim().replace(/^@/,'')||null};const person=cloudProfiles.find(p=>p.id===profileEditingId)||currentProfile||{};const c=window._crop||{x:Number(person.avatar_x??50),y:Number(person.avatar_y??50),zoom:Number(person.avatar_zoom??1)};return {...b,avatar_x:c.x,avatar_y:c.y,avatar_zoom:c.zoom};}
+document.getElementById('customCardModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeCustomCardToDraft();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('customCardModal').classList.contains('open')){e.preventDefault();closeCustomCardToDraft();}});
+document.addEventListener('click',e=>{const i=e.target.closest('input.native-picker,input[type="date"],input[type="time"]');if(i&&typeof i.showPicker==='function'){try{i.showPicker();}catch(_){}}});
+</script></body>
+</html>
